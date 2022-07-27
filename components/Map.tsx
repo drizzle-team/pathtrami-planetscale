@@ -93,7 +93,7 @@ const Map: React.FC<Props> = (props) => {
 				ref={mapRef}
 				center={props.markerLocation}
 				zoom={17}
-				static={props.static}
+				static={props.static ?? false}
 				attributionControl={false}
 			>
 				<TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
