@@ -23,7 +23,7 @@ export default function render() {
 					rel='stylesheet'
 				/>
 				<link
-					href='http://fonts.cdnfonts.com/css/hittedal-script'
+					href='https://fonts.cdnfonts.com/css/hittedal-script'
 					rel='stylesheet'
 				/>
 				<style
