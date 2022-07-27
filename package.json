@@ -1,0 +1,47 @@
+{
+	"name": "pathtrami",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"postinstall": "pnpm add file:../codecast/drizzle-orm/drizzle-orm/package.tgz file:../codecast/drizzle-orm/drizzle-orm-mysql/package.tgz"
+	},
+	"dependencies": {
+		"@fortawesome/fontawesome-svg-core": "^6.1.2",
+		"@fortawesome/free-solid-svg-icons": "^6.1.2",
+		"@fortawesome/react-fontawesome": "^0.2.0",
+		"@stitches/react": "^1.2.8",
+		"axios": "^0.27.2",
+		"drizzle-orm": "file:../codecast/drizzle-orm/drizzle-orm/package.tgz",
+		"drizzle-orm-mysql": "file:../codecast/drizzle-orm/drizzle-orm-mysql/package.tgz",
+		"formik": "^2.2.9",
+		"framer-motion": "^6.3.16",
+		"immer": "^9.0.15",
+		"leaflet": "^1.8.0",
+		"lodash.once": "^4.1.1",
+		"mysql2": "^2.3.3",
+		"next": "12.2.0",
+		"normalize.css": "^8.0.1",
+		"polished": "^4.2.2",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"react-leaflet": "^4.0.1",
+		"react-query": "^3.39.1",
+		"swiper": "^8.3.1",
+		"use-immer": "^0.7.0"
+	},
+	"devDependencies": {
+		"@types/leaflet": "^1.7.11",
+		"@types/lodash.once": "^4.1.7",
+		"@types/node": "18.0.0",
+		"@types/react": "18.0.14",
+		"@types/react-dom": "18.0.5",
+		"dprint": "^0.30.2",
+		"eslint": "8.19.0",
+		"eslint-config-next": "12.2.0",
+		"typescript": "4.7.4"
+	}
+}
