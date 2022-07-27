@@ -7,7 +7,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"postinstall": "pnpm add file:drizzle-orm.tgz file:drizzle-orm-mysql.tgz"
+		"drzl": "pnpm add file:drizzle-orm.tgz file:drizzle-orm-mysql.tgz"
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^6.1.2",
