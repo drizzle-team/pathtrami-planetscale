@@ -7,7 +7,7 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"postinstall": "pnpm add file:../codecast/drizzle-orm/drizzle-orm/package.tgz file:../codecast/drizzle-orm/drizzle-orm-mysql/package.tgz"
+		"postinstall": "pnpm add file:drizzle-orm.tgz file:drizzle-orm-mysql.tgz"
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^6.1.2",
@@ -15,8 +15,8 @@
 		"@fortawesome/react-fontawesome": "^0.2.0",
 		"@stitches/react": "^1.2.8",
 		"axios": "^0.27.2",
-		"drizzle-orm": "file:../codecast/drizzle-orm/drizzle-orm/package.tgz",
-		"drizzle-orm-mysql": "file:../codecast/drizzle-orm/drizzle-orm-mysql/package.tgz",
+		"drizzle-orm": "file:drizzle-orm.tgz",
+		"drizzle-orm-mysql": "file:drizzle-orm-mysql.tgz",
 		"formik": "^2.2.9",
 		"framer-motion": "^6.3.16",
 		"immer": "^9.0.15",

@@ -12,8 +12,8 @@ specifiers:
   '@types/react-dom': 18.0.5
   axios: ^0.27.2
   dprint: ^0.30.2
-  drizzle-orm: file:../codecast/drizzle-orm/drizzle-orm/package.tgz
-  drizzle-orm-mysql: file:../codecast/drizzle-orm/drizzle-orm-mysql/package.tgz
+  drizzle-orm: file:drizzle-orm.tgz
+  drizzle-orm-mysql: file:drizzle-orm-mysql.tgz
   eslint: 8.19.0
   eslint-config-next: 12.2.0
   formik: ^2.2.9
