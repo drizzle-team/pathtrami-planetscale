@@ -68,11 +68,11 @@ const ViewMode = memo<ViewModeProps>(
 						</Link>
 					</div>
 					<div className='images'>
-						{place.images.map((image) => (
-							<div className='image' key={image}>
+						{place.images.map((image, i) => (
+							<div className='image' key={image.id}>
 								<Image
-									src='https://picsum.photos/seed/1/500/500'
-									alt='Instructions'
+									src={image.url}
+									alt={`Instructions ${i + 1}`}
 									layout='fill'
 								/>
 							</div>

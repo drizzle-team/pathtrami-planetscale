@@ -7,9 +7,12 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
+		"ts:watch": "tsc --watch",
 		"postinstall": "pnpm add file:drizzle-orm.tgz file:drizzle-orm-mysql.tgz"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.137.0",
+		"@aws-sdk/s3-request-presigner": "^3.137.0",
 		"@fortawesome/fontawesome-svg-core": "^6.1.2",
 		"@fortawesome/free-solid-svg-icons": "^6.1.2",
 		"@fortawesome/react-fontawesome": "^0.2.0",
@@ -31,7 +34,8 @@
 		"react-leaflet": "^4.0.1",
 		"react-query": "^3.39.1",
 		"swiper": "^8.3.1",
-		"use-immer": "^0.7.0"
+		"use-immer": "^0.7.0",
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"@types/leaflet": "^1.7.11",
@@ -39,6 +43,7 @@
 		"@types/node": "18.0.0",
 		"@types/react": "18.0.14",
 		"@types/react-dom": "18.0.5",
+		"@types/uuid": "^8.3.4",
 		"dprint": "^0.30.2",
 		"eslint": "8.19.0",
 		"eslint-config-next": "12.2.0",

@@ -57,4 +57,5 @@ const Root = styled('div', {
 	overflow: 'hidden',
 	margin: '0 auto',
 	padding: '0 15px',
+	position: 'relative',
 });

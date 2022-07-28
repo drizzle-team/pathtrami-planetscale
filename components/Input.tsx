@@ -25,6 +25,8 @@ interface Props {
 	onBlur?: FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 	readOnly?: boolean;
 	placeholder?: string;
+	maxLength?: number;
+	disabled?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(

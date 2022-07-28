@@ -2,9 +2,7 @@ import { VariantProps } from '@stitches/react';
 import { ButtonHTMLAttributes, FC } from 'react';
 import { styled, theme } from '~/stitches.config';
 
-interface Props
-	extends ButtonHTMLAttributes<HTMLButtonElement>,
-		VariantProps<typeof Root> {
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof Root> {
 	icon?: React.ReactNode;
 }
 

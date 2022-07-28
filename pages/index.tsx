@@ -1,17 +1,18 @@
-import type { NextPage } from 'next';
-import { Swiper, SwiperSlide } from 'swiper/react';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useQuery } from 'react-query';
 import axios from 'axios';
+import type { NextPage } from 'next';
 import Link from 'next/link';
+import { useQuery } from 'react-query';
+import { FreeMode } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 import 'swiper/css';
 
+import Button from '~/components/Button';
 import Header from '~/components/Header';
 import LocationCard from '~/components/LocationCard';
 import { styled } from '~/stitches.config';
-import Button from '~/components/Button';
 import { Place } from './api/places';
 
 const Home: NextPage = () => {
@@ -38,7 +39,7 @@ const Home: NextPage = () => {
 			/>
 
 			{placesQuery.data && (
-				<Swiper spaceBetween={15} slidesPerView='auto'>
+				<Swiper spaceBetween={15} slidesPerView='auto' modules={[FreeMode]} freeMode>
 					{placesQuery.data.map((place) => (
 						<SwiperSlide key={place.slug}>
 							<LocationCard

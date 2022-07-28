@@ -123,7 +123,7 @@ const Root = styled('div', {
 	background: theme.colors.bg,
 	display: 'grid',
 	gridTemplateColumns: '1fr',
-	gridTemplateRows: 'min-content 1fr min-content',
+	gridTemplateRows: 'min-content 441px min-content',
 	gap: 20,
 	zIndex: 402,
 	padding: `47px ${theme.sizes.screenPadding} 20px`,

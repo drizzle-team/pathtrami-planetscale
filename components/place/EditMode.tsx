@@ -1,20 +1,22 @@
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import axios, { AxiosResponse } from 'axios';
 import { useFormik } from 'formik';
-import { FC, useState } from 'react';
-import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import axios from 'axios';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { ChangeEventHandler, FC, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { v4 as uuid } from 'uuid';
 
+import { MapContainer, Root } from '~/pages/[slug]';
 import { Place, PlaceLocation } from '~/pages/api/places';
+import { SavePlaceRequest, UpdatePlaceResponse } from '~/pages/api/places/[slug]';
+import { styled } from '~/stitches.config';
 import Button from '../Button';
 import Header from '../Header';
 import Input from '../Input';
-import { MapContainer, Root } from '~/pages/[slug]';
-import { styled } from '~/stitches.config';
 import LocationSelection from './LocationSelection';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useRouter } from 'next/router';
 
 const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 
@@ -25,12 +27,38 @@ interface EditModeProps {
 	onCancel: () => void;
 }
 
+interface ImageDataBase {
+	id: string;
+	url: string;
+}
+
+interface NewImageData extends ImageDataBase {
+	new: true;
+	file: File;
+}
+
+interface OldImageData extends ImageDataBase {
+	new?: false;
+}
+
+type ImageData = NewImageData | OldImageData;
+
 interface PlaceFormData {
 	location: PlaceLocation;
 	name: string;
 	address: string;
 	description: string;
-	images: string[];
+	images: ImageData[];
+}
+
+async function uploadImages(uploadUrls: string[], images: NewImageData[]) {
+	await Promise.all(
+		uploadUrls.map(async (url) => {
+			const formData = new FormData();
+			formData.append('file', images.shift()!.file);
+			await axios.post(url, formData);
+		}),
+	);
 }
 
 const EditMode: FC<EditModeProps> = ({
@@ -41,28 +69,78 @@ const EditMode: FC<EditModeProps> = ({
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
-	const [locationSelectionActive, setLocationSelectionActive] =
-		useState(false);
+	const [locationSelectionActive, setLocationSelectionActive] = useState(false);
 
-	const [deleteConfirmationActive, setDeleteConfirmationActive] =
-		useState(false);
+	const [deleteConfirmationActive, setDeleteConfirmationActive] = useState(false);
+
+	const [fileInputKey, setFileInputKey] = useState(uuid());
 
 	const savePlaceMutation = useMutation(
 		async (formData: PlaceFormData) => {
-			// Create new place
+			let slug: string;
+
+			const newImages = formData.images.filter(
+				(image): image is NewImageData => !!image.new,
+			);
+
 			if (!place) {
-				return (await axios.post<Place>('/api/places', formData)).data;
+				// Create new place
+
+				const requestData: SavePlaceRequest<'new'> = {
+					...formData,
+					images: formData.images.map((image) => ({
+						id: image.id,
+						new: true,
+						file: (image as NewImageData).file.name,
+					})),
+				};
+
+				const place = await axios
+					.post<Place, AxiosResponse<Place>, SavePlaceRequest<'new'>>('/api/places', requestData)
+					.then(({ data }) => data);
+				slug = place.slug;
+
+				await uploadImages(
+					place.images.map(({ url }) => url),
+					newImages,
+				);
+			} else {
+				// Update existing place
+
+				slug = place.slug;
+
+				const requestData: SavePlaceRequest = {
+					...formData,
+					images: formData.images.map((image) =>
+						image.new
+							? {
+								id: image.id,
+								new: true,
+								file: image.file.name,
+							}
+							: {
+								id: image.id,
+							}
+					),
+				};
+
+				const response = await axios
+					.post<
+						UpdatePlaceResponse,
+						AxiosResponse<UpdatePlaceResponse>,
+						SavePlaceRequest
+					>(`/api/places/${place.slug}`, requestData)
+					.then(({ data }) => data);
+
+				await uploadImages(response.images, newImages);
 			}
 
-			// Update existing place
-			return (
-				await axios.post<Place>(`/api/places/${place.slug}`, formData)
-			).data;
+			return slug;
 		},
 		{
-			onSuccess(data) {
+			onSuccess(slug) {
 				queryClient.invalidateQueries('places');
-				onSave(place?.slug ?? data!.slug);
+				onSave(place?.slug ?? slug);
 			},
 		},
 	);
@@ -77,13 +155,17 @@ const EditMode: FC<EditModeProps> = ({
 		savePlaceMutation.mutate(formData);
 	};
 
-	const formik = useFormik<PlaceFormData>({
+	const form = useFormik<PlaceFormData>({
 		initialValues: {
 			location: place?.location ?? { lat: 0, lng: 0 },
 			name: place?.name ?? '',
 			address: place?.address ?? '',
 			description: place?.description ?? '',
-			images: place?.images ?? [],
+			images: place?.images.map(({ id, url }) => ({
+				id: String(id),
+				url,
+				type: 'old',
+			})) ?? [],
 		},
 		onSubmit: handleSubmit,
 	});
@@ -96,8 +178,8 @@ const EditMode: FC<EditModeProps> = ({
 		location: PlaceLocation;
 	}) => {
 		setLocationSelectionActive(false);
-		formik.setFieldValue('address', address);
-		formik.setFieldValue('location', location);
+		form.setFieldValue('address', address);
+		form.setFieldValue('location', location);
 	};
 
 	const handleDeleteButtonClick = () => {
@@ -113,6 +195,34 @@ const EditMode: FC<EditModeProps> = ({
 		deletePlaceMutation.mutate(place.slug);
 	};
 
+	const handleImageSelect: ChangeEventHandler<HTMLInputElement> = (e) => {
+		const { files } = e.target;
+		const file = files?.[0];
+		if (!file) {
+			return;
+		}
+
+		setFileInputKey(uuid());
+
+		// Create blob url for image
+		const reader = new FileReader();
+		reader.onload = () => {
+			const imageUrl = reader.result as string;
+			const newImage: NewImageData = {
+				id: uuid(),
+				url: imageUrl,
+				new: true,
+				file,
+			};
+			form.setFieldValue('images', [...form.values.images, newImage]);
+		};
+		reader.readAsDataURL(file);
+	};
+
+	const handleImageDelete = (id: string) => {
+		form.setFieldValue('images', form.values.images.filter(({ id: imageId }) => imageId !== id));
+	};
+
 	return (
 		<>
 			<Header
@@ -122,13 +232,14 @@ const EditMode: FC<EditModeProps> = ({
 							variant='secondary'
 							size='sm'
 							onClick={onCancel}
+							disabled={deletePlaceMutation.isLoading || savePlaceMutation.isLoading}
 						>
 							Cancel
 						</Button>
 						<Button
 							variant='cta'
 							size='sm'
-							onClick={() => formik.handleSubmit()}
+							onClick={() => form.handleSubmit()}
 							disabled={savePlaceMutation.isLoading}
 						>
 							{savePlaceMutation.isLoading ? 'Saving...' : 'Save'}
@@ -142,31 +253,34 @@ const EditMode: FC<EditModeProps> = ({
 						<Map
 							mode='view'
 							static
-							markerLocation={formik.values.location}
+							markerLocation={form.values.location}
 						/>
-						<EditMapButton
-							size='sm'
-							onClick={() => setLocationSelectionActive(true)}
-						>
-							Edit
-						</EditMapButton>
+						{!savePlaceMutation.isLoading && (
+							<EditMapButton size='sm' onClick={() => setLocationSelectionActive(true)}>
+								Edit
+							</EditMapButton>
+						)}
 					</MapContainer>
 					<div>
 						<Input
 							label='Name'
 							name='name'
-							value={formik.values.name}
-							onChange={formik.handleChange}
+							value={form.values.name}
+							onChange={form.handleChange}
 							placeholder='My home'
+							maxLength={50}
+							disabled={savePlaceMutation.isLoading}
 						/>
 					</div>
 					<div>
 						<Input
 							label='Address'
 							name='address'
-							value={formik.values.address}
-							onChange={formik.handleChange}
+							value={form.values.address}
+							onChange={form.handleChange}
 							placeholder='123 Main St'
+							maxLength={50}
+							disabled={savePlaceMutation.isLoading}
 						/>
 					</div>
 					<div>
@@ -174,30 +288,38 @@ const EditMode: FC<EditModeProps> = ({
 							multiline
 							label='Description (optional)'
 							name='description'
-							value={formik.values.description}
-							onChange={formik.handleChange}
-							placeholder='Some instructions on how to get there'
+							value={form.values.description}
+							onChange={form.handleChange}
+							placeholder='Extra info and some instructions on how to get there'
+							maxLength={500}
+							disabled={savePlaceMutation.isLoading}
 						/>
 					</div>
 					<div className='images'>
-						{formik.values.images.map((image, index) => (
-							<div className='image' key={index}>
-								<Image
-									src={image}
-									alt={`Instructions ${index + 1}`}
-									layout='fill'
-								/>
-								<div className='remove'>
-									<FontAwesomeIcon icon={faTimes} size='lg' />
-								</div>
+						{form.values.images.map((image, index) => (
+							<div className='image' key={image.id}>
+								<Image src={image.url} alt={`Instructions ${index + 1}`} layout='fill' />
+								{!savePlaceMutation.isLoading && (
+									<button className='remove' onClick={() => handleImageDelete(image.id)}>
+										<FontAwesomeIcon icon={faTimes} size='lg' />
+									</button>
+								)}
 							</div>
 						))}
+						{form.values.images.length < 4 && (
+							<div className='image new'>
+								<FontAwesomeIcon icon={faPlus} />
+								Add image
+								<input key={fileInputKey} type='file' accept='image/png, image/jpeg' onChange={handleImageSelect} />
+							</div>
+						)}
 					</div>
 					{!!place && (
 						<Button
 							variant='secondary'
 							onClick={handleDeleteButtonClick}
-							disabled={deletePlaceMutation.isLoading}
+							disabled={deletePlaceMutation.isLoading || savePlaceMutation.isLoading}
+							style={{ marginTop: 50 }}
 						>
 							{deletePlaceMutation.isLoading
 								? 'Deleting...'
@@ -210,8 +332,8 @@ const EditMode: FC<EditModeProps> = ({
 
 				{locationSelectionActive && (
 					<LocationSelection
-						address={formik.values.address}
-						location={formik.values.location}
+						address={form.values.address}
+						location={form.values.location}
 						onSave={handleAddressChange}
 					/>
 				)}
