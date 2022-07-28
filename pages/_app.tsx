@@ -53,7 +53,7 @@ const globalStyles = globalCss({
 });
 
 const Root = styled('div', {
-	maxWidth: 768,
+	maxWidth: 500,
 	overflow: 'hidden',
 	margin: '0 auto',
 	padding: '0 15px',

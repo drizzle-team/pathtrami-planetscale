@@ -57,6 +57,7 @@ export const Root = styled('div', {
 	display: 'flex',
 	flexFlow: 'column nowrap',
 	gap: 15,
+	position: 'relative',
 
 	'.buttons': {
 		display: 'flex',

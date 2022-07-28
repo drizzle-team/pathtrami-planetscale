@@ -15,6 +15,8 @@ export default async function handler(
 			return handleGet(req, res);
 		case 'POST':
 			return handlePost(req, res);
+		case 'DELETE':
+			return handleDelete(req, res);
 		default:
 			res.status(405).json({ message: 'Method not allowed' });
 			break;
@@ -100,5 +102,22 @@ async function handlePost(
 		await db.placesImages.insert(imagesToInsert).execute();
 	}
 
-	res.status(201).json({ message: 'Place updated' });
+	res.status(200).json({ message: 'Place updated' });
+}
+
+async function handleDelete(
+	req: NextApiRequest,
+	res: NextApiResponse<{ message: string }>,
+) {
+	const db = await getConnection();
+	const slug = req.query['slug'] as string;
+
+	await db.placesImages
+		.delete()
+		.where(eq(placesImages.placeSlug, slug))
+		.execute();
+
+	await db.places.delete().where(eq(places.slug, slug)).execute();
+
+	res.status(200).json({ message: 'Place deleted' });
 }

@@ -14,6 +14,7 @@ import { MapContainer, Root } from '~/pages/[slug]';
 import { styled } from '~/stitches.config';
 import LocationSelection from './LocationSelection';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useRouter } from 'next/router';
 
 const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 
@@ -38,8 +39,12 @@ const EditMode: FC<EditModeProps> = ({
 	onCancel,
 }: EditModeProps) => {
 	const queryClient = useQueryClient();
+	const router = useRouter();
 
 	const [locationSelectionActive, setLocationSelectionActive] =
+		useState(false);
+
+	const [deleteConfirmationActive, setDeleteConfirmationActive] =
 		useState(false);
 
 	const savePlaceMutation = useMutation(
@@ -61,6 +66,12 @@ const EditMode: FC<EditModeProps> = ({
 			},
 		},
 	);
+
+	const deletePlaceMutation = useMutation(async (slug: string) => {
+		await axios.delete(`/api/places/${slug}`);
+		queryClient.invalidateQueries('places');
+		router.push('/');
+	});
 
 	const handleSubmit = (formData: PlaceFormData) => {
 		savePlaceMutation.mutate(formData);
@@ -87,6 +98,19 @@ const EditMode: FC<EditModeProps> = ({
 		setLocationSelectionActive(false);
 		formik.setFieldValue('address', address);
 		formik.setFieldValue('location', location);
+	};
+
+	const handleDeleteButtonClick = () => {
+		if (!place) {
+			return;
+		}
+
+		if (!deleteConfirmationActive) {
+			setDeleteConfirmationActive(true);
+			return;
+		}
+
+		deletePlaceMutation.mutate(place.slug);
 	};
 
 	return (
@@ -169,16 +193,29 @@ const EditMode: FC<EditModeProps> = ({
 							</div>
 						))}
 					</div>
+					{!!place && (
+						<Button
+							variant='secondary'
+							onClick={handleDeleteButtonClick}
+							disabled={deletePlaceMutation.isLoading}
+						>
+							{deletePlaceMutation.isLoading
+								? 'Deleting...'
+								: deleteConfirmationActive
+								? 'Press again to confirm'
+								: 'Delete place'}
+						</Button>
+					)}
 				</>
-			</Root>
 
-			{locationSelectionActive && (
-				<LocationSelection
-					address={formik.values.address}
-					location={formik.values.location}
-					onSave={handleAddressChange}
-				/>
-			)}
+				{locationSelectionActive && (
+					<LocationSelection
+						address={formik.values.address}
+						location={formik.values.location}
+						onSave={handleAddressChange}
+					/>
+				)}
+			</Root>
 		</>
 	);
 };
