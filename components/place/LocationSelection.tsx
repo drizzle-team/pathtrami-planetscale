@@ -13,7 +13,7 @@ const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 interface Props {
 	address: string;
 	location?: PlaceLocation;
-	onSave: (data: { address: string; location: PlaceLocation }) => void;
+	onSave: (data: { address: string; location: PlaceLocation; }) => void;
 }
 
 const LocationSelection: FC<Props> = (props) => {
@@ -23,8 +23,7 @@ const LocationSelection: FC<Props> = (props) => {
 	const [input, setInput] = useState<
 		HTMLInputElement | HTMLTextAreaElement | null
 	>(null);
-	const [autocompleteMenu, setAutocompleteMenu] =
-		useState<HTMLDivElement | null>(null);
+	const [autocompleteMenu, setAutocompleteMenu] = useState<HTMLDivElement | null>(null);
 
 	const handleInputFocus: FocusEventHandler = (e) => {
 		setIsAutocompleteOpen(true);
@@ -54,10 +53,10 @@ const LocationSelection: FC<Props> = (props) => {
 	useEffect(() => {
 		function handler(e: TouchEvent | MouseEvent) {
 			if (
-				e.target instanceof Node &&
-				e.target !== autocompleteMenu &&
-				e.target !== input &&
-				!autocompleteMenu?.contains(e.target)
+				e.target instanceof Node
+				&& e.target !== autocompleteMenu
+				&& e.target !== input
+				&& !autocompleteMenu?.contains(e.target)
 			) {
 				setIsAutocompleteOpen(false);
 				input?.blur();
@@ -93,8 +92,7 @@ const LocationSelection: FC<Props> = (props) => {
 					}}
 				>
 					<div className='item' onClick={handleCurrentLocation}>
-						<FontAwesomeIcon icon={faLocationDot} /> Use current
-						location
+						<FontAwesomeIcon icon={faLocationDot} /> Use current location
 					</div>
 				</div>
 			</div>
@@ -115,7 +113,7 @@ const LocationSelection: FC<Props> = (props) => {
 export default LocationSelection;
 
 const Root = styled('div', {
-	position: 'absolute',
+	position: 'fixed',
 	top: 0,
 	left: 0,
 	right: 0,

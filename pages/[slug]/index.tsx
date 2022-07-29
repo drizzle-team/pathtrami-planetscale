@@ -57,7 +57,7 @@ export const Root = styled('div', {
 	display: 'flex',
 	flexFlow: 'column nowrap',
 	gap: 15,
-	paddingBottom: 118,
+	paddingBottom: 50,
 
 	'.buttons': {
 		display: 'flex',
@@ -74,6 +74,7 @@ export const Root = styled('div', {
 		gridTemplateColumns: 'repeat(2, 1fr)',
 		gridAutoRows: '1fr',
 		gap: 10,
+		marginTop: 10,
 
 		'.image': {
 			borderRadius: theme.sizes.borderRadius,
@@ -85,7 +86,6 @@ export const Root = styled('div', {
 			alignItems: 'center',
 			justifyContent: 'center',
 			cursor: 'pointer',
-			marginTop: 10,
 
 			'&.new': {
 				border: '1px dashed #FFF',

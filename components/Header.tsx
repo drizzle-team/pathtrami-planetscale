@@ -1,6 +1,6 @@
-import { FC } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FC } from 'react';
 
 import { styled, theme } from '~/stitches.config';
 
@@ -39,7 +39,7 @@ const Root = styled('div', {
 	justifyContent: 'space-between',
 	alignItems: 'center',
 	height: 79,
-	margin: '28px 0',
+	// margin: '28px 0',
 });
 
 const Logo = styled('div', {

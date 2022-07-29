@@ -1,14 +1,14 @@
 import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FC, memo, useMemo } from 'react';
-import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import { FC, memo, useMemo } from 'react';
 
+import Link from 'next/link';
+import { MapContainer, Root } from '~/pages/[slug]';
 import { Place } from '~/pages/api/places';
 import Button from '../Button';
 import Header from '../Header';
-import { MapContainer, Root } from '~/pages/[slug]';
-import Link from 'next/link';
 
 const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 
@@ -22,7 +22,7 @@ const ViewMode = memo<ViewModeProps>(
 		const description = useMemo(
 			() =>
 				place.description.split('\n').map((line) => {
-					return <p key={line}>{line}</p>;
+					return <div key={line}>{line}</div>;
 				}),
 			[place.description],
 		);

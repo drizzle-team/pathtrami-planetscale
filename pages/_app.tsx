@@ -1,24 +1,27 @@
+import { config } from '@fortawesome/fontawesome-svg-core';
 import { globalCss } from '@stitches/react';
+import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import { QueryClientProvider } from 'react-query';
-import { config } from '@fortawesome/fontawesome-svg-core';
 
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import 'normalize.css/normalize.css';
 
-import queryClient from '~/utils/queryClient';
 import { styled, theme } from '~/stitches.config';
+import queryClient from '~/utils/queryClient';
 
 config.autoAddCss = false;
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
 	globalStyles();
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Root>
-				<Component {...pageProps} />
-			</Root>
+			<SessionProvider session={session}>
+				<Root>
+					<Component {...pageProps} />
+				</Root>
+			</SessionProvider>
 		</QueryClientProvider>
 	);
 }

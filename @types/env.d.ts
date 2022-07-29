@@ -8,6 +8,8 @@ declare module 'process' {
 				CLOUDFLARE_SECRET_ACCESS_KEY: string;
 				CLOUDFLARE_BUCKET_NAME: string;
 				CLOUDFLARE_IMAGES_API_TOKEN: string;
+				GOOGLE_CLIENT_ID: string;
+				GOOGLE_CLIENT_SECRET: string;
 			}
 		}
 	}
