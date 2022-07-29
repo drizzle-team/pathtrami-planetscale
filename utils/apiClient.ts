@@ -4,7 +4,7 @@ import { Credentials } from 'google-auth-library';
 import { useEffect, useMemo, useState } from 'react';
 
 export const apiClient = axios.create({
-	baseURL: 'http://localhost:3000/api',
+	baseURL: process.env.NEXT_PUBLIC_API_HOST,
 });
 
 apiClient.interceptors.request.use(async (config) => {
