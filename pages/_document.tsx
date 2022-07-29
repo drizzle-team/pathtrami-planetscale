@@ -1,11 +1,13 @@
 import { Head, Html, Main, NextScript } from 'next/document';
+import Script from 'next/script';
 
-import { getCssText, styled } from '~/stitches.config';
+import { getCssText } from '~/stitches.config';
 
 export default function render() {
 	return (
 		<Html>
 			<Head>
+				<Script src='https://accounts.google.com/gsi/client' strategy='beforeInteractive' />
 				<link
 					rel='stylesheet'
 					href='https://unpkg.com/leaflet@1.8.0/dist/leaflet.css'

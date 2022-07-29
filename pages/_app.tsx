@@ -1,27 +1,40 @@
 import { config } from '@fortawesome/fontawesome-svg-core';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { globalCss } from '@stitches/react';
-import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
+import { ReactElement, ReactNode } from 'react';
 import { QueryClientProvider } from 'react-query';
 
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import 'normalize.css/normalize.css';
 
+import { NextPage } from 'next';
 import { styled, theme } from '~/stitches.config';
 import queryClient from '~/utils/queryClient';
 
 config.autoAddCss = false;
 
-function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+export type NextPageWithLayout = NextPage & {
+	getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+	Component: NextPageWithLayout;
+};
+
+function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 	globalStyles();
+
+	const getLayout = Component.getLayout ?? ((page) => page);
+	const content = getLayout(<Component {...pageProps} />);
 
 	return (
 		<QueryClientProvider client={queryClient}>
-			<SessionProvider session={session}>
+			<GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
 				<Root>
-					<Component {...pageProps} />
+					{content}
 				</Root>
-			</SessionProvider>
+			</GoogleOAuthProvider>
 		</QueryClientProvider>
 	);
 }

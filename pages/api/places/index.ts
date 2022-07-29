@@ -7,6 +7,7 @@ import { places } from '~/models/places';
 import { InferModel } from 'drizzle-orm-mysql';
 import { SavePlaceRequest } from './[slug]';
 import { imagesClient } from '~/utils/cloudflare';
+import { getCurrentUserId } from '~/utils/auth';
 
 export interface Place {
 	slug: string;
@@ -18,6 +19,7 @@ export interface Place {
 		id: string;
 		url: string;
 	}[];
+	createdBy: string;
 }
 
 export interface PlaceLocation {
@@ -28,7 +30,13 @@ export interface PlaceLocation {
 export async function mapPlaceResponse(
 	place: Pick<
 		InferModel<typeof places>,
-		'slug' | 'name' | 'address' | 'description' | 'lat' | 'lng'
+		| 'slug'
+		| 'name'
+		| 'address'
+		| 'description'
+		| 'lat'
+		| 'lng'
+		| 'createdBy'
 	>,
 	images: Pick<InferModel<typeof placesImages>, 'id' | 'url'>[],
 ): Promise<Place> {
@@ -42,6 +50,7 @@ export async function mapPlaceResponse(
 			lng: place.lng,
 		},
 		images,
+		createdBy: place.createdBy,
 	};
 }
 
@@ -49,7 +58,13 @@ export async function aggregatePlaces(
 	rows: {
 		places: Pick<
 			InferModel<typeof places>,
-			'slug' | 'name' | 'address' | 'description' | 'lat' | 'lng'
+			| 'slug'
+			| 'name'
+			| 'address'
+			| 'description'
+			| 'lat'
+			| 'lng'
+			| 'createdBy'
 		>;
 		placesImages: Pick<InferModel<typeof placesImages>, 'id' | 'url'>;
 	}[],
@@ -118,7 +133,16 @@ export default async function handler(
 	}
 }
 
-async function handleGet(req: NextApiRequest, res: NextApiResponse<Place[]>) {
+async function handleGet(
+	req: NextApiRequest,
+	res: NextApiResponse<Place[] | { message: string }>,
+) {
+	const userId = await getCurrentUserId(req);
+	if (!userId) {
+		res.status(401).json({ message: 'Unauthorized' });
+		return;
+	}
+
 	const db = await getConnection();
 
 	const items: Place[] = await db.places
@@ -127,6 +151,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse<Place[]>) {
 			id: placesImages.id,
 			url: placesImages.url,
 		})
+		.where(eq(places.createdBy, userId))
 		.orderBy(desc(places.createdAt), desc(placesImages.createdAt))
 		.execute()
 		.then(aggregatePlaces);
@@ -134,7 +159,16 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse<Place[]>) {
 	res.status(200).json(items);
 }
 
-async function handlePost(req: NextApiRequest, res: NextApiResponse<Place>) {
+async function handlePost(
+	req: NextApiRequest,
+	res: NextApiResponse<Place | { message: string }>,
+) {
+	const userId = await getCurrentUserId(req);
+	if (!userId) {
+		res.status(401).json({ message: 'Unauthorized' });
+		return;
+	}
+
 	const db = await getConnection();
 	const { name, address, description, location, images } =
 		req.body as SavePlaceRequest<'new'>;
@@ -149,6 +183,7 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse<Place>) {
 			description,
 			lat: location.lat,
 			lng: location.lng,
+			createdBy: userId,
 		})
 		.execute();
 

@@ -1,21 +1,49 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import axios from 'axios';
+import { useGoogleLogin } from '@react-oauth/google';
+import { Credentials } from 'google-auth-library';
 import type { NextPage } from 'next';
 import Link from 'next/link';
-import { useQuery } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 
 import Button from '~/components/Button';
 import Header from '~/components/Header';
 import LocationCard from '~/components/LocationCard';
 import { styled } from '~/stitches.config';
+import useAuthenticated, { apiClient, logout, setGoogleAuth } from '~/utils/apiClient';
 import { Place } from './api/places';
 
 const Home: NextPage = () => {
-	const placesQuery = useQuery('places', async () => {
-		const { data } = await axios.get<Place[]>('/api/places');
-		return data;
+	const isAuthenticated = useAuthenticated();
+
+	const handleLogout = () => {
+		logout();
+		window.location.reload();
+	};
+
+	const googleLoginMutation = useMutation(async (code: string) => {
+		return apiClient.post<Credentials>('/auth/google', {
+			code,
+		}).then(({ data }) => data);
+	}, {
+		onSuccess: (data) => {
+			setGoogleAuth(data);
+			window.location.reload();
+		},
 	});
+
+	const login = useGoogleLogin({
+		flow: 'auth-code',
+		onSuccess: (response) => {
+			googleLoginMutation.mutate(response.code);
+		},
+		onError: console.error,
+	});
+
+	const placesQuery = useQuery('places', async () => {
+		const { data } = await apiClient.get<Place[]>('/places');
+		return data;
+	}, { enabled: isAuthenticated });
 
 	return (
 		<Root>
@@ -47,6 +75,14 @@ const Home: NextPage = () => {
 					))}
 				</LocationCards>
 			)}
+
+			{isAuthenticated
+				? (
+					<Button variant='secondary' style={{ marginTop: 50 }} onClick={handleLogout}>
+						Log out
+					</Button>
+				)
+				: <Button variant='primary' style={{ marginTop: 50 }} onClick={login}>Log in with Google</Button>}
 		</Root>
 	);
 };

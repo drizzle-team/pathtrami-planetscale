@@ -1,13 +1,14 @@
-import axios from 'axios';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 
 import EditMode from '~/components/place/EditMode';
 import ViewMode from '~/components/place/ViewMode';
 import { styled, theme } from '~/stitches.config';
+import { apiClient } from '~/utils/apiClient';
 import { Place } from '../api/places';
+import { GetPlaceResponse } from '../api/places/[slug]';
 
 const LocationPage: NextPage = () => {
 	const router = useRouter();
@@ -17,8 +18,8 @@ const LocationPage: NextPage = () => {
 	const placeQuery = useQuery(
 		['places', router.query['slug']],
 		async () => {
-			const { data } = await axios.get<Place>(
-				`/api/places/${router.query['slug']}`,
+			const { data } = await apiClient.get<GetPlaceResponse>(
+				`/places/${router.query['slug']}`,
 			);
 			return data;
 		},
@@ -37,6 +38,7 @@ const LocationPage: NextPage = () => {
 		return (
 			<ViewMode
 				place={placeQuery.data}
+				editable={placeQuery.data.editable}
 				setEditMode={() => setMode('edit')}
 			/>
 		);

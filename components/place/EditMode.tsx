@@ -1,18 +1,21 @@
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useGoogleLogin } from '@react-oauth/google';
 import axios, { AxiosResponse } from 'axios';
 import { useFormik } from 'formik';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { ChangeEventHandler, FC, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import { v4 as uuid } from 'uuid';
 
+import { Credentials } from 'google-auth-library';
 import { MapContainer, Root } from '~/pages/[slug]';
 import { Place, PlaceLocation } from '~/pages/api/places';
 import { SavePlaceRequest, UpdatePlaceResponse } from '~/pages/api/places/[slug]';
 import { styled } from '~/stitches.config';
+import { apiClient, isAuthenticated, setGoogleAuth } from '~/utils/apiClient';
 import Button from '../Button';
 import Header from '../Header';
 import Input from '../Input';
@@ -75,6 +78,25 @@ const EditMode: FC<EditModeProps> = ({
 
 	const [fileInputKey, setFileInputKey] = useState(uuid());
 
+	const googleLoginMutation = useMutation(async (code: string) => {
+		return apiClient.post<Credentials>('/auth/google', {
+			code,
+		}).then(({ data }) => data);
+	}, {
+		onSuccess: (data) => {
+			setGoogleAuth(data);
+			handleSubmit(form.values);
+		},
+	});
+
+	const login = useGoogleLogin({
+		flow: 'auth-code',
+		onSuccess: (response) => {
+			googleLoginMutation.mutate(response.code);
+		},
+		onError: console.error,
+	});
+
 	const savePlaceMutation = useMutation(
 		async (formData: PlaceFormData) => {
 			let slug: string;
@@ -95,8 +117,8 @@ const EditMode: FC<EditModeProps> = ({
 					})),
 				};
 
-				const place = await axios
-					.post<Place, AxiosResponse<Place>, SavePlaceRequest<'new'>>('/api/places', requestData)
+				const place = await apiClient
+					.post<Place, AxiosResponse<Place>, SavePlaceRequest<'new'>>('/places', requestData)
 					.then(({ data }) => data);
 				slug = place.slug;
 
@@ -146,12 +168,17 @@ const EditMode: FC<EditModeProps> = ({
 	);
 
 	const deletePlaceMutation = useMutation(async (slug: string) => {
-		await axios.delete(`/api/places/${slug}`);
+		await apiClient.delete(`/places/${slug}`);
 		queryClient.invalidateQueries('places');
 		router.push('/');
 	});
 
 	const handleSubmit = (formData: PlaceFormData) => {
+		if (!isAuthenticated()) {
+			login();
+			return;
+		}
+
 		savePlaceMutation.mutate(formData);
 	};
 

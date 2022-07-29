@@ -5,8 +5,9 @@ import { InferModel } from 'drizzle-orm-mysql';
 import { getConnection } from '~/utils/db';
 import { places } from '~/models/places';
 import { placesImages } from '~/models/places_images';
-import { aggregatePlaces, PlaceLocation, createUploadUrls } from '..';
+import { aggregatePlaces, PlaceLocation, createUploadUrls, Place } from '..';
 import { imagesClient } from '~/utils/cloudflare';
+import { getCurrentUserId } from '~/utils/auth';
 
 export default async function handler(
 	req: NextApiRequest,
@@ -25,7 +26,16 @@ export default async function handler(
 	}
 }
 
-async function handleGet(req: NextApiRequest, res: NextApiResponse) {
+export type GetPlaceResponse = Place & {
+	editable: boolean;
+};
+
+async function handleGet(
+	req: NextApiRequest,
+	res: NextApiResponse<GetPlaceResponse | { message: string }>,
+) {
+	const userId = await getCurrentUserId(req);
+
 	const db = await getConnection();
 	const [place] = await db.places
 		.select()
@@ -43,7 +53,10 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 		return;
 	}
 
-	res.status(200).json(place);
+	res.status(200).json({
+		...place,
+		editable: !!userId && userId === place.createdBy,
+	});
 }
 
 interface ImageDataBase {
@@ -76,8 +89,14 @@ export interface UpdatePlaceResponse {
 
 async function handlePost(
 	req: NextApiRequest,
-	res: NextApiResponse<UpdatePlaceResponse>,
+	res: NextApiResponse<UpdatePlaceResponse | { message: string }>,
 ) {
+	const userId = await getCurrentUserId(req);
+	if (!userId) {
+		res.status(401).json({ message: 'Unauthorized' });
+		return;
+	}
+
 	const db = await getConnection();
 	const slug = req.query['slug'] as string;
 	const { name, address, description, location, images } =
@@ -92,11 +111,16 @@ async function handlePost(
 		}).filter(([, value]) => typeof value !== 'undefined'),
 	);
 
-	await db.places
+	const [{ affectedRows }] = await db.places
 		.update()
 		.set(fieldsToUpdate)
-		.where(eq(places.slug, slug))
+		.where(and(eq(places.createdBy, userId), eq(places.slug, slug)))
 		.execute();
+
+	if (affectedRows === 0) {
+		res.status(404).json({ message: 'Place not found' });
+		return;
+	}
 
 	const oldImages: OldImageData[] = [];
 	const newImages: NewImageData[] = [];

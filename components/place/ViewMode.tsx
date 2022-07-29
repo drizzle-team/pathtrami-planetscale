@@ -14,11 +14,12 @@ const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 
 interface ViewModeProps {
 	place: Place;
+	editable: boolean;
 	setEditMode: () => void;
 }
 
 const ViewMode = memo<ViewModeProps>(
-	({ place, setEditMode }: ViewModeProps) => {
+	({ editable, place, setEditMode }: ViewModeProps) => {
 		const description = useMemo(
 			() =>
 				place.description.split('\n').map((line) => {
@@ -30,7 +31,7 @@ const ViewMode = memo<ViewModeProps>(
 		return (
 			<>
 				<Header
-					actions={
+					actions={editable && (
 						<Button
 							size='sm'
 							icon={<FontAwesomeIcon icon={faPenToSquare} />}
@@ -38,7 +39,7 @@ const ViewMode = memo<ViewModeProps>(
 						>
 							Edit
 						</Button>
-					}
+					)}
 				/>
 				<Root>
 					<MapContainer>

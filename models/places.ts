@@ -11,4 +11,5 @@ export const places = mySqlTable('places', {
 	createdAt: timestamp('created_at')
 		.notNull()
 		.default(sql`now()`),
+	createdBy: text('created_by').notNull(),
 });
