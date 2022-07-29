@@ -4,10 +4,6 @@ import axios from 'axios';
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useQuery } from 'react-query';
-import { FreeMode } from 'swiper';
-import { Swiper, SwiperSlide } from 'swiper/react';
-
-import 'swiper/css';
 
 import Button from '~/components/Button';
 import Header from '~/components/Header';
@@ -39,18 +35,17 @@ const Home: NextPage = () => {
 			/>
 
 			{placesQuery.data && (
-				<Swiper spaceBetween={15} slidesPerView='auto' modules={[FreeMode]} freeMode>
+				<LocationCards>
 					{placesQuery.data.map((place) => (
-						<SwiperSlide key={place.slug}>
-							<LocationCard
-								name={place.name}
-								address={place.address}
-								location={place.location}
-								slug={place.slug}
-							/>
-						</SwiperSlide>
+						<LocationCard
+							key={place.slug}
+							name={place.name}
+							address={place.address}
+							location={place.location}
+							slug={place.slug}
+						/>
 					))}
-				</Swiper>
+				</LocationCards>
 			)}
 		</Root>
 	);
@@ -72,27 +67,9 @@ const Root = styled('div', {
 	},
 });
 
-const Location = styled('div', {
-	cursor: 'pointer',
-	transition: 'all 150ms',
-
-	'.title': {
-		display: 'flex',
-		flexFlow: 'row nowrap',
-		alignItems: 'center',
-	},
-
-	img: {
-		width: '32px',
-	},
-});
-
 const LocationCards = styled('div', {
 	display: 'flex',
 	flexFlow: 'row nowrap',
 	gap: 15,
-});
-
-const LocationCardSlide = styled(SwiperSlide, {
-	width: 'auto',
+	overflowY: 'auto',
 });

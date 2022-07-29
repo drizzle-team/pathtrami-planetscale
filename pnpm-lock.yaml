@@ -33,7 +33,6 @@ specifiers:
   react-dom: 18.2.0
   react-leaflet: ^4.0.1
   react-query: ^3.39.1
-  swiper: ^8.3.1
   typescript: 4.7.4
   use-immer: ^0.7.0
   uuid: ^8.3.2
@@ -60,7 +59,6 @@ dependencies:
   react-dom: 18.2.0_react@18.2.0
   react-leaflet: 4.0.1_zklzwh7pdkx5k4fi5tz77jtq6y
   react-query: 3.39.1_biqbaboplfbrettd7655fr4n2y
-  swiper: 8.3.1
   use-immer: 0.7.0_immer@9.0.15+react@18.2.0
   uuid: 8.3.2
 
@@ -1033,12 +1031,6 @@ packages:
     dependencies:
       esutils: 2.0.3
     dev: true
-
-  /dom7/4.0.4:
-    resolution: {integrity: sha512-DSSgBzQ4rJWQp1u6o+3FVwMNnT5bzQbMb+o31TjYYeRi05uAcpF8koxdfzeoe5ElzPmua7W7N28YJhF7iEKqIw==}
-    dependencies:
-      ssr-window: 4.0.2
-    dev: false
 
   /dprint/0.30.2:
     resolution: {integrity: sha512-YJOk5WS3z6avEoLw9KxPuCNTaYynDn6ysT0r44TmK6Ty+4pOftcmhtukP6fDW/EG8tfjI7Jx5MZSS5e0iOQfZg==}
@@ -2513,10 +2505,6 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /ssr-window/4.0.2:
-    resolution: {integrity: sha512-ISv/Ch+ig7SOtw7G2+qkwfVASzazUnvlDTwypdLoPoySv+6MqlOV10VwPSE6EWkGjhW50lUmghPmpYZXMu/+AQ==}
-    dev: false
-
   /string.prototype.matchall/4.0.7:
     resolution: {integrity: sha512-f48okCX7JiwVi1NXCVWcFnZgADDC/n2vePlQ/KUCNqCikLLilQvwjMO8+BHVKvgzH0JB0J9LEPgxOGT02RoETg==}
     dependencies:
@@ -2604,15 +2592,6 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
     dev: true
-
-  /swiper/8.3.1:
-    resolution: {integrity: sha512-oASYsulsERlbQVTZ8FjlTDJSN4YZwhp+AkvepOj8EOhgpvxzKoMpWpBPrk7ypkMioQUx6x2NPvkRU0Qv9mpS0A==}
-    engines: {node: '>= 4.7.0'}
-    requiresBuild: true
-    dependencies:
-      dom7: 4.0.4
-      ssr-window: 4.0.2
-    dev: false
 
   /text-table/0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
