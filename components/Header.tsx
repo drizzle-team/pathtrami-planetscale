@@ -17,12 +17,16 @@ const Header: FC<Props> = ({ actions }) => {
 				<a>
 					<Logo>
 						Pathtrami
-						<Image
-							src={LogoSvg.src}
-							width={LogoSvg.width}
-							height={LogoSvg.height}
-							alt='Pathtrami'
-						/>
+						{
+							<div className='image'>
+								<Image
+									src={LogoSvg.src}
+									width={LogoSvg.width / 3}
+									height={LogoSvg.height / 3}
+									alt='Pathtrami'
+								/>
+							</div>
+						}
 					</Logo>
 				</a>
 			</Link>
@@ -34,12 +38,12 @@ const Header: FC<Props> = ({ actions }) => {
 export default Header;
 
 const Root = styled('div', {
+	flex: '0 0 auto',
 	display: 'flex',
 	flexFlow: 'row nowrap',
 	justifyContent: 'space-between',
 	alignItems: 'center',
 	height: 79,
-	// margin: '28px 0',
 });
 
 const Logo = styled('div', {

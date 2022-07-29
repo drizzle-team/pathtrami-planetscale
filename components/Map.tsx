@@ -1,20 +1,17 @@
 import L, { DragEndEventHandlerFn } from 'leaflet';
-import {
-	MapContainer as MapContainerDefault,
-	TileLayer,
-	Marker as LeafletMarker,
-} from 'react-leaflet';
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { FC, forwardRef, useEffect, useState } from 'react';
+import { MapContainer as MapContainerDefault, Marker as LeafletMarker, TileLayer } from 'react-leaflet';
 
 import { styled } from '@stitches/react';
-import MarkerSvg from '~/public/marker.svg';
 import { PlaceLocation } from '~/pages/api/places';
+import MarkerSvg from '~/public/marker.svg';
+import { theme } from '~/stitches.config';
 
 interface EditModeProps {
 	mode: 'edit';
 	static?: never;
-	markerLocation?: PlaceLocation;
+	markerLocation?: PlaceLocation | undefined;
 	setMarkerLocation: (location: PlaceLocation) => void;
 }
 
@@ -25,13 +22,34 @@ interface ViewModeProps {
 	setMarkerLocation?: undefined;
 }
 
-type Props = EditModeProps | ViewModeProps;
+type Props = (EditModeProps | ViewModeProps) & {
+	mapRef?: (map: L.Map) => void;
+};
 
-const Map: React.FC<Props> = (props) => {
+const Map: FC<Props> = ({ mapRef, ...props }) => {
 	const [map, setMap] = useState<L.Map>();
-	const mapRef = (map: L.Map) => setMap(map);
+	const setMapRef = (map: L.Map) => {
+		setMap(map);
+		mapRef?.(map);
+	};
 
 	const { setMarkerLocation } = props;
+
+	useEffect(() => {
+		if (!map) {
+			return;
+		}
+
+		const handleLocationFound = (e: L.LocationEvent) => {
+			setMarkerLocation?.(e.latlng);
+		};
+
+		map.on('locationfound', handleLocationFound);
+
+		return () => {
+			map.off('locationfound', handleLocationFound);
+		};
+	}, [map, setMarkerLocation]);
 
 	useEffect(() => {
 		if (map) {
@@ -90,7 +108,7 @@ const Map: React.FC<Props> = (props) => {
 	return (
 		<Root>
 			<MapContainer
-				ref={mapRef}
+				ref={setMapRef}
 				center={props.markerLocation}
 				zoom={17}
 				static={props.static ?? false}
@@ -108,8 +126,8 @@ const Map: React.FC<Props> = (props) => {
 				<Marker>
 					<Image
 						src={MarkerSvg.src}
-						width={MarkerSvg.width}
-						height={MarkerSvg.height}
+						width={MarkerSvg.width / 2}
+						height={MarkerSvg.height / 2}
 						alt='marker'
 					/>
 				</Marker>
@@ -122,8 +140,8 @@ export default Map;
 
 const MarkerIcon = new L.Icon({
 	iconUrl: MarkerSvg.src,
-	iconSize: [MarkerSvg.width, MarkerSvg.height],
-	iconAnchor: [25, MarkerSvg.height - 8],
+	iconSize: [MarkerSvg.width / 2, MarkerSvg.height / 2],
+	iconAnchor: [24, 28],
 });
 
 const Root = styled('div', {
@@ -153,4 +171,10 @@ const Marker = styled('div', {
 	zIndex: 401,
 	pointerEvents: 'none',
 	userSelect: 'none',
+	transition: `all 100ms`,
+
+	'.leaflet-dragging &': {
+		filter: 'drop-shadow(0 5px 3px rgba(0, 0, 0, .7))',
+		transform: 'translate(calc(-50% - 8px), calc(-50% - 10px))',
+	},
 });

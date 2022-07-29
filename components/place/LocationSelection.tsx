@@ -1,7 +1,7 @@
-import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faLocationCrosshairs, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import dynamic from 'next/dynamic';
-import { FC, FocusEventHandler, useEffect, useState } from 'react';
+import dynamic, { DynamicOptions } from 'next/dynamic';
+import { FC, FocusEventHandler, RefAttributes, useEffect, useState } from 'react';
 
 import { PlaceLocation } from '~/pages/api/places';
 import { styled, theme } from '~/stitches.config';
@@ -14,9 +14,10 @@ interface Props {
 	address: string;
 	location?: PlaceLocation;
 	onSave: (data: { address: string; location: PlaceLocation; }) => void;
+	onCancel: () => void;
 }
 
-const LocationSelection: FC<Props> = (props) => {
+const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 	const [address, setAddress] = useState(props.address);
 	const [location, setLocation] = useState(props.location);
 	const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
@@ -24,30 +25,26 @@ const LocationSelection: FC<Props> = (props) => {
 		HTMLInputElement | HTMLTextAreaElement | null
 	>(null);
 	const [autocompleteMenu, setAutocompleteMenu] = useState<HTMLDivElement | null>(null);
+	const [map, setMap] = useState<L.Map>();
 
 	const handleInputFocus: FocusEventHandler = (e) => {
 		setIsAutocompleteOpen(true);
 	};
 
 	const handleCurrentLocation = () => {
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					setLocation({
-						lat: position.coords.latitude,
-						lng: position.coords.longitude,
-					});
-				},
-				(error) => {
-					console.error(error);
-				},
-				{ enableHighAccuracy: true },
-			);
+		if (!map) {
+			return;
 		}
+
+		map.locate({
+			setView: true,
+			maxZoom: 17,
+			enableHighAccuracy: true,
+		});
 	};
 
 	const handleSave = () => {
-		props.onSave({ address, location: location! });
+		onSave({ address, location: location! });
 	};
 
 	useEffect(() => {
@@ -96,15 +93,22 @@ const LocationSelection: FC<Props> = (props) => {
 					</div>
 				</div>
 			</div>
-			{location && (
+			<div className='map-container'>
 				<Map
+					mapRef={setMap}
 					mode='edit'
 					markerLocation={location}
 					setMarkerLocation={setLocation}
 				/>
-			)}
-			<Button variant='cta' onClick={handleSave}>
+				<Button className='current-location-button' onClick={handleCurrentLocation}>
+					<FontAwesomeIcon icon={faLocationCrosshairs} size='2x' />
+				</Button>
+			</div>
+			<Button variant='cta' onClick={handleSave} style={{ marginTop: 20 }}>
 				Save Address
+			</Button>
+			<Button variant='secondary' onClick={onCancel} style={{ marginTop: 10 }}>
+				Cancel
 			</Button>
 		</Root>
 	);
@@ -113,18 +117,10 @@ const LocationSelection: FC<Props> = (props) => {
 export default LocationSelection;
 
 const Root = styled('div', {
-	position: 'fixed',
-	top: 0,
-	left: 0,
-	right: 0,
-	bottom: 0,
-	background: theme.colors.bg,
-	display: 'grid',
-	gridTemplateColumns: '1fr',
-	gridTemplateRows: 'min-content 441px min-content',
-	gap: 20,
+	display: 'flex',
+	flexFlow: 'column nowrap',
 	zIndex: 402,
-	padding: `47px ${theme.sizes.screenPadding} 20px`,
+	padding: `20px ${theme.sizes.screenPadding} 20px`,
 
 	'.address-container': {
 		position: 'relative',
@@ -152,6 +148,24 @@ const Root = styled('div', {
 					borderBottom: `1px solid ${theme.colors.inputBorder}`,
 				},
 			},
+		},
+	},
+
+	'.map-container': {
+		height: 441,
+		marginTop: 20,
+		position: 'relative',
+
+		'.current-location-button': {
+			position: 'absolute',
+			right: 20,
+			bottom: 20,
+			zIndex: 1001,
+			borderRadius: '50%',
+			width: 48,
+			height: 48,
+			boxShadow: '0 0 5px 1px #000',
+			// border: '2px solid rgba(0,0,0,0.2)',
 		},
 	},
 });

@@ -1,4 +1,5 @@
-import { NextPage } from 'next';
+import axios from 'axios';
+import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
@@ -8,37 +9,42 @@ import ViewMode from '~/components/place/ViewMode';
 import { styled, theme } from '~/stitches.config';
 import { apiClient } from '~/utils/apiClient';
 import { Place } from '../api/places';
-import { GetPlaceResponse } from '../api/places/[slug]';
+import { getPlace } from '../api/places/[slug]';
 
-const LocationPage: NextPage = () => {
+interface Props {
+	place: Place;
+}
+
+const LocationPage: NextPage<Props> = ({ place }) => {
 	const router = useRouter();
 
 	const [mode, setMode] = useState<'view' | 'edit'>('view');
+	const [editable, setEditable] = useState(false);
 
-	const placeQuery = useQuery(
-		['places', router.query['slug']],
+	useQuery(
+		['places', router.query['slug'], 'editable'],
 		async () => {
-			const { data } = await apiClient.get<GetPlaceResponse>(
-				`/places/${router.query['slug']}`,
-			);
-			return data;
+			return apiClient.get<boolean>(
+				`/places/${place.slug}/editable`,
+			).then(({ data }) => data);
 		},
-		{ enabled: router.query['slug'] !== undefined },
+		{
+			onSuccess: (editable) => {
+				setEditable(editable);
+			},
+		},
 	);
 
 	const handlePlaceUpdated = () => {
+		router.replace(router.asPath);
 		setMode('view');
 	};
-
-	if (!placeQuery.data) {
-		return null;
-	}
 
 	if (mode === 'view') {
 		return (
 			<ViewMode
-				place={placeQuery.data}
-				editable={placeQuery.data.editable}
+				place={place}
+				editable={editable}
 				setEditMode={() => setMode('edit')}
 			/>
 		);
@@ -46,7 +52,7 @@ const LocationPage: NextPage = () => {
 
 	return (
 		<EditMode
-			place={placeQuery.data}
+			place={place}
 			onSave={handlePlaceUpdated}
 			onCancel={() => setMode('view')}
 		/>
@@ -55,11 +61,35 @@ const LocationPage: NextPage = () => {
 
 export default LocationPage;
 
+export const getServerSideProps: GetServerSideProps = async ({ query, res }) => {
+	const place = await getPlace(query['slug'] as string);
+
+	if (!place) {
+		res.statusCode = 302;
+		res.setHeader('Location', '/');
+		res.end();
+		return { props: {} };
+	}
+
+	return {
+		props: {
+			place,
+		},
+	};
+};
+
 export const Root = styled('div', {
 	display: 'flex',
 	flexFlow: 'column nowrap',
-	gap: 15,
-	paddingBottom: 50,
+	height: '100%',
+
+	variants: {
+		hidden: {
+			true: {
+				display: 'none',
+			},
+		},
+	},
 
 	'.buttons': {
 		display: 'flex',
@@ -68,6 +98,19 @@ export const Root = styled('div', {
 
 		button: {
 			width: '100%',
+		},
+	},
+
+	'.content': {
+		flex: '1',
+		overflowY: 'auto',
+		paddingBottom: 50,
+		display: 'flex',
+		flexFlow: 'column nowrap',
+		gap: 15,
+
+		'> *': {
+			flex: '0 0 auto',
 		},
 	},
 

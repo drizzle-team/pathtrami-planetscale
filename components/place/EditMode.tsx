@@ -146,12 +146,11 @@ const EditMode: FC<EditModeProps> = ({
 					),
 				};
 
-				const response = await axios
-					.post<
-						UpdatePlaceResponse,
-						AxiosResponse<UpdatePlaceResponse>,
-						SavePlaceRequest
-					>(`/api/places/${place.slug}`, requestData)
+				const response = await apiClient.post<
+					UpdatePlaceResponse,
+					AxiosResponse<UpdatePlaceResponse>,
+					SavePlaceRequest
+				>(`/places/${place.slug}`, requestData)
 					.then(({ data }) => data);
 
 				await uploadImages(response.images, newImages);
@@ -252,30 +251,30 @@ const EditMode: FC<EditModeProps> = ({
 
 	return (
 		<>
-			<Header
-				actions={
-					<HeaderButtons>
-						<Button
-							variant='secondary'
-							size='sm'
-							onClick={onCancel}
-							disabled={deletePlaceMutation.isLoading || savePlaceMutation.isLoading}
-						>
-							Cancel
-						</Button>
-						<Button
-							variant='cta'
-							size='sm'
-							onClick={() => form.handleSubmit()}
-							disabled={savePlaceMutation.isLoading}
-						>
-							{savePlaceMutation.isLoading ? 'Saving...' : 'Save'}
-						</Button>
-					</HeaderButtons>
-				}
-			/>
-			<Root>
-				<>
+			<Root hidden={locationSelectionActive}>
+				<Header
+					actions={
+						<HeaderButtons>
+							<Button
+								variant='secondary'
+								size='sm'
+								onClick={onCancel}
+								disabled={deletePlaceMutation.isLoading || savePlaceMutation.isLoading}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant='cta'
+								size='sm'
+								onClick={() => form.handleSubmit()}
+								disabled={savePlaceMutation.isLoading}
+							>
+								{savePlaceMutation.isLoading ? 'Saving...' : 'Save'}
+							</Button>
+						</HeaderButtons>
+					}
+				/>
+				<div className='content'>
 					<MapContainer>
 						<Map
 							mode='view'
@@ -355,16 +354,17 @@ const EditMode: FC<EditModeProps> = ({
 								: 'Delete place'}
 						</Button>
 					)}
-				</>
-
-				{locationSelectionActive && (
-					<LocationSelection
-						address={form.values.address}
-						location={form.values.location}
-						onSave={handleAddressChange}
-					/>
-				)}
+				</div>
 			</Root>
+
+			{locationSelectionActive && (
+				<LocationSelection
+					address={form.values.address}
+					location={form.values.location}
+					onSave={handleAddressChange}
+					onCancel={() => setLocationSelectionActive(false)}
+				/>
+			)}
 		</>
 	);
 };
@@ -387,4 +387,5 @@ const EditMapButton = styled(Button, {
 	top: 6,
 	zIndex: 402,
 	width: 68,
+	boxShadow: '0 0 3px 1px #000',
 });

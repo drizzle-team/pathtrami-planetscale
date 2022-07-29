@@ -14,8 +14,6 @@ export default async function handler(
 	res: NextApiResponse,
 ) {
 	switch (req.method) {
-		case 'GET':
-			return handleGet(req, res);
 		case 'POST':
 			return handlePost(req, res);
 		case 'DELETE':
@@ -26,16 +24,7 @@ export default async function handler(
 	}
 }
 
-export type GetPlaceResponse = Place & {
-	editable: boolean;
-};
-
-async function handleGet(
-	req: NextApiRequest,
-	res: NextApiResponse<GetPlaceResponse | { message: string }>,
-) {
-	const userId = await getCurrentUserId(req);
-
+export async function getPlace(slug: string): Promise<Place | undefined> {
 	const db = await getConnection();
 	const [place] = await db.places
 		.select()
@@ -43,20 +32,12 @@ async function handleGet(
 			id: placesImages.id,
 			url: placesImages.url,
 		})
-		.where(eq(places.slug, req.query['slug'] as string))
+		.where(eq(places.slug, slug))
 		.orderBy(asc(placesImages.index))
 		.execute()
 		.then(aggregatePlaces);
 
-	if (!place) {
-		res.status(404).json({ message: 'Place not found' });
-		return;
-	}
-
-	res.status(200).json({
-		...place,
-		editable: !!userId && userId === place.createdBy,
-	});
+	return place;
 }
 
 interface ImageDataBase {

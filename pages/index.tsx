@@ -93,14 +93,6 @@ const Root = styled('div', {
 	height: '100%',
 	display: 'flex',
 	flexFlow: 'column nowrap',
-
-	'.swiper': {
-		width: '100%',
-	},
-
-	'.swiper-slide': {
-		width: 'auto',
-	},
 });
 
 const LocationCards = styled('div', {

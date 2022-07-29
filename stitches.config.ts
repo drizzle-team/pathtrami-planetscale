@@ -32,6 +32,7 @@ export const { styled, getCssText, theme } = createStitches({
 			borderRadius: '4px',
 			lineHeight: '24px',
 			screenPadding: '15px',
+			maxWidth: '500px',
 		},
 		transitions: {
 			duration: '150ms',

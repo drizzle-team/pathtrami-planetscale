@@ -69,9 +69,10 @@ const globalStyles = globalCss({
 });
 
 const Root = styled('div', {
-	maxWidth: 500,
+	maxWidth: theme.sizes.maxWidth,
 	overflow: 'hidden',
 	margin: '0 auto',
 	padding: '0 15px',
 	position: 'relative',
+	height: '100%',
 });
