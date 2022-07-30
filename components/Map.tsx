@@ -202,7 +202,7 @@ async function getPreview(location: PlaceLocation): Promise<Blob> {
 	const style: Partial<CSSStyleDeclaration> = {
 		width: `${theme.sizes.mapPreviewWidth}`,
 		height: `${theme.sizes.mapHeight}`,
-		position: 'absolute',
+		position: 'fixed',
 		top: '0',
 		left: '0',
 		pointerEvents: 'none',

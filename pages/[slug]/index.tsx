@@ -95,10 +95,12 @@ export const getServerSideProps: GetServerSideProps = async ({ query, res }) => 
 	const place = await getPlace(query['slug'] as string);
 
 	if (!place) {
-		res.statusCode = 302;
-		res.setHeader('Location', '/');
-		res.end();
-		return { props: {} };
+		return {
+			redirect: {
+				destination: '/',
+				permanent: false,
+			},
+		};
 	}
 
 	return {
