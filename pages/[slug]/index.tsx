@@ -41,8 +41,6 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 		setMode('view');
 	};
 
-	console.log(router);
-
 	const title = `${place.name} - Pathtrami`;
 	const host = 'https://pathtrami.vercel.app';
 	const description =
