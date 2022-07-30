@@ -12,4 +12,5 @@ export const places = mySqlTable('places', {
 		.notNull()
 		.default(sql`now()`),
 	createdBy: text('created_by').notNull(),
+	previewURL: text('preview_url').notNull(),
 });

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { GetServerSideProps, NextPage } from 'next';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useQuery } from 'react-query';
@@ -40,22 +41,50 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 		setMode('view');
 	};
 
-	if (mode === 'view') {
-		return (
-			<ViewMode
-				place={place}
-				editable={editable}
-				setEditMode={() => setMode('edit')}
-			/>
-		);
-	}
+	const title = `${place.name} - Pathtrami`;
+	const description =
+		'Sharing a place location has never been easier! Visit https://pathtrami.fly.dev and share your first place in 5 minutes.';
+	const url = `https://pathtrami.fly.dev/${place.slug}`;
 
 	return (
-		<EditMode
-			place={place}
-			onSave={handlePlaceUpdated}
-			onCancel={() => setMode('view')}
-		/>
+		<>
+			<Head>
+				<title>{title}</title>
+				<meta name='title' content={title} />
+				<meta
+					name='description'
+					content={description}
+				/>
+
+				<meta name='og:title' content={title} />
+				<meta name='og:description' content={description} />
+				<meta name='og:image' content={place.previewURL} />
+				<meta name='og:url' content={url} />
+				<meta name='og:type' content='website' />
+
+				<meta name='twitter:title' content={title} />
+				<meta name='twitter:description' content={description} />
+				<meta name='twitter:image' content={place.previewURL} />
+				<meta name='twitter:url' content={url} />
+				<meta name='twitter:card' content='summary_large_image' />
+			</Head>
+
+			{mode === 'view'
+				? (
+					<ViewMode
+						place={place}
+						editable={editable}
+						setEditMode={() => setMode('edit')}
+					/>
+				)
+				: (
+					<EditMode
+						place={place}
+						onSave={handlePlaceUpdated}
+						onCancel={() => setMode('view')}
+					/>
+				)}
+		</>
 	);
 };
 

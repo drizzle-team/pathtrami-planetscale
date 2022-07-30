@@ -2,6 +2,7 @@ import { faLocationCrosshairs, faLocationDot } from '@fortawesome/free-solid-svg
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import dynamic, { DynamicOptions } from 'next/dynamic';
 import { FC, FocusEventHandler, RefAttributes, useEffect, useState } from 'react';
+import { MapRef } from '~/components/Map';
 
 import { PlaceLocation } from '~/pages/api/places';
 import { styled, theme } from '~/stitches.config';
@@ -25,18 +26,18 @@ const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 		HTMLInputElement | HTMLTextAreaElement | null
 	>(null);
 	const [autocompleteMenu, setAutocompleteMenu] = useState<HTMLDivElement | null>(null);
-	const [map, setMap] = useState<L.Map>();
+	const [mapRef, setMapRef] = useState<MapRef | null>(null);
 
 	const handleInputFocus: FocusEventHandler = (e) => {
 		setIsAutocompleteOpen(true);
 	};
 
 	const handleCurrentLocation = () => {
-		if (!map) {
+		if (!mapRef) {
 			return;
 		}
 
-		map.locate({
+		mapRef.map.locate({
 			setView: true,
 			maxZoom: 17,
 			enableHighAccuracy: true,
@@ -95,7 +96,7 @@ const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 			</div>
 			<div className='map-container'>
 				<Map
-					mapRef={setMap}
+					mapRef={setMapRef}
 					mode='edit'
 					markerLocation={location}
 					setMarkerLocation={setLocation}

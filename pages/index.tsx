@@ -69,6 +69,7 @@ const Home: NextPage = () => {
 							key={place.slug}
 							name={place.name}
 							address={place.address}
+							previewURL={place.previewURL}
 							location={place.location}
 							slug={place.slug}
 						/>

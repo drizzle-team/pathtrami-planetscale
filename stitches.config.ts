@@ -28,6 +28,7 @@ export const { styled, getCssText, theme } = createStitches({
 		},
 		sizes: {
 			cardMapWidth: '282px',
+			mapPreviewWidth: '538px',
 			mapHeight: '282px',
 			borderRadius: '4px',
 			lineHeight: '24px',

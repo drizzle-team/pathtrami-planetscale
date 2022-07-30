@@ -1,4 +1,5 @@
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import Link from 'next/link';
 import { FC } from 'react';
 
@@ -9,6 +10,7 @@ const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 interface Props {
 	name: string;
 	address: string;
+	previewURL: string;
 	location: {
 		lat: number;
 		lng: number;
@@ -16,13 +18,13 @@ interface Props {
 	slug: string;
 }
 
-const LocationCard: FC<Props> = ({ name, address, location, slug }) => {
+const LocationCard: FC<Props> = ({ name, address, previewURL, location, slug }) => {
 	return (
 		<Link href={`/${slug}`}>
 			<a>
 				<Root>
-					<div className='map'>
-						<Map mode='view' static markerLocation={location} />
+					<div className='preview'>
+						<img src={previewURL} alt={name} />
 					</div>
 					<TextWrapper>
 						<div>
@@ -44,11 +46,17 @@ const Root = styled('div', {
 	padding: '4px 4px 34px 4px',
 	userSelect: 'none',
 
-	'.map': {
+	'.preview': {
 		width: theme.sizes.cardMapWidth,
 		height: theme.sizes.mapHeight,
 		borderRadius: `${theme.sizes.borderRadius}px ${theme.sizes.borderRadius}px 0 0`,
 		overflow: 'hidden',
+
+		img: {
+			width: '100%',
+			height: '100%',
+			objectFit: 'cover',
+		},
 	},
 });
 

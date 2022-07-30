@@ -6,13 +6,18 @@ import { placesImages } from '~/models/places_images';
 import { places } from '~/models/places';
 import { InferModel } from 'drizzle-orm-mysql';
 import { SavePlaceRequest } from './[slug]';
-import { imagesClient } from '~/utils/cloudflare';
 import { getCurrentUserId } from '~/utils/auth';
+import {
+	buildPlacePreviewKey,
+	createUploadUrl,
+	createUploadUrls,
+} from '~/utils/s3';
 
 export interface Place {
 	slug: string;
 	name: string;
 	address: string;
+	previewURL: string;
 	description: string;
 	location: PlaceLocation;
 	images: {
@@ -37,6 +42,7 @@ export async function mapPlaceResponse(
 		| 'lat'
 		| 'lng'
 		| 'createdBy'
+		| 'previewURL'
 	>,
 	images: Pick<InferModel<typeof placesImages>, 'id' | 'url'>[],
 ): Promise<Place> {
@@ -44,6 +50,7 @@ export async function mapPlaceResponse(
 		slug: place.slug,
 		name: place.name,
 		address: place.address,
+		previewURL: place.previewURL,
 		description: place.description,
 		location: {
 			lat: place.lat,
@@ -65,6 +72,7 @@ export async function aggregatePlaces(
 			| 'lat'
 			| 'lng'
 			| 'createdBy'
+			| 'previewURL'
 		>;
 		placesImages: Pick<InferModel<typeof placesImages>, 'id' | 'url'>;
 	}[],
@@ -87,34 +95,28 @@ export async function aggregatePlaces(
 	return result;
 }
 
-export type UploadUrlsResponse = {
-	id: string;
-	uploadURL: string;
-	serveURL: string;
-}[];
+// export async function createUploadUrls(
+// 	filesCount: number,
+// ): Promise<UploadUrlsResponse> {
+// 	return await Promise.all(
+// 		Array.from({ length: filesCount }, async () => {
+// 			const { id, uploadURL } = await imagesClient
+// 				.post<{ result: { id: string; uploadURL: string } }>(
+// 					`/images/v2/direct_upload`,
+// 				)
+// 				.then(({ data }) => data.result);
+// 			const serveURL = await imagesClient
+// 				.get<{ result: { variants: [string] } }>(`/images/v1/${id}`)
+// 				.then(({ data }) => data.result.variants[0]);
 
-export async function createUploadUrls(
-	filesCount: number,
-): Promise<UploadUrlsResponse> {
-	return await Promise.all(
-		Array.from({ length: filesCount }, async () => {
-			const { id, uploadURL } = await imagesClient
-				.post<{ result: { id: string; uploadURL: string } }>(
-					`/images/v2/direct_upload`,
-				)
-				.then(({ data }) => data.result);
-			const serveURL = await imagesClient
-				.get<{ result: { variants: [string] } }>(`/images/v1/${id}`)
-				.then(({ data }) => data.result.variants[0]);
-
-			return {
-				id,
-				uploadURL,
-				serveURL,
-			};
-		}),
-	);
-}
+// 			return {
+// 				id,
+// 				uploadURL,
+// 				serveURL,
+// 			};
+// 		}),
+// 	);
+// }
 
 export default async function handler(
 	req: NextApiRequest,
@@ -175,6 +177,8 @@ async function handlePost(
 
 	const slug = Math.random().toString(36).substring(2);
 
+	const previewImage = await createUploadUrl(buildPlacePreviewKey(slug));
+
 	await db.places
 		.insert({
 			slug,
@@ -184,6 +188,7 @@ async function handlePost(
 			lat: location.lat,
 			lng: location.lng,
 			createdBy: userId,
+			previewURL: previewImage.serveURL,
 		})
 		.execute();
 
@@ -194,13 +199,15 @@ async function handlePost(
 		.execute()
 		.then(([place]) => place!);
 
+	place.previewURL = previewImage.uploadURL;
+
 	let imagesToUpload: Pick<InferModel<typeof placesImages>, 'id' | 'url'>[] =
 		[];
 
 	if (images.length) {
 		// Create upload URLs for each image and return them in the response
 
-		const uploadUrls = await createUploadUrls(images.length);
+		const uploadUrls = await createUploadUrls(images.length, slug);
 
 		await db.placesImages
 			.insert(

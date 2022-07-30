@@ -5,9 +5,19 @@ import { InferModel } from 'drizzle-orm-mysql';
 import { getConnection } from '~/utils/db';
 import { places } from '~/models/places';
 import { placesImages } from '~/models/places_images';
-import { aggregatePlaces, PlaceLocation, createUploadUrls, Place } from '..';
-import { imagesClient } from '~/utils/cloudflare';
+import { aggregatePlaces, PlaceLocation, Place } from '..';
 import { getCurrentUserId } from '~/utils/auth';
+import {
+	buildPlaceImageKey,
+	buildPlacePrefix,
+	buildPlacePreviewKey,
+	createUploadUrl,
+	createUploadUrls,
+	deleteObject,
+	deleteObjectsWithPrefix,
+} from '~/utils/s3';
+import isEqual from 'lodash.isequal';
+import { MySqlUpdateSet } from 'drizzle-orm-mysql/queries';
 
 export default async function handler(
 	req: NextApiRequest,
@@ -66,6 +76,7 @@ export interface SavePlaceRequest<TKind extends 'new' | 'edit' = 'edit'> {
 
 export interface UpdatePlaceResponse {
 	images: string[];
+	previewURL: string | null;
 }
 
 async function handlePost(
@@ -82,7 +93,16 @@ async function handlePost(
 	const slug = req.query['slug'] as string;
 	const { name, address, description, location, images } =
 		req.body as SavePlaceRequest;
-	const fieldsToUpdate = Object.fromEntries(
+
+	const oldLocation = await db.places
+		.select({
+			lat: places.lat,
+			lng: places.lng,
+		})
+		.where(eq(places.slug, slug))
+		.execute();
+
+	const fieldsToUpdate: MySqlUpdateSet<typeof places> = Object.fromEntries(
 		Object.entries({
 			name,
 			address,
@@ -91,6 +111,14 @@ async function handlePost(
 			lng: location.lng,
 		}).filter(([, value]) => typeof value !== 'undefined'),
 	);
+
+	let previewURL: string | null = null;
+
+	if (!isEqual(oldLocation, location)) {
+		const previewImage = await createUploadUrl(buildPlacePreviewKey(slug));
+		fieldsToUpdate.previewURL = previewImage.serveURL;
+		previewURL = previewImage.uploadURL;
+	}
 
 	const [{ affectedRows }] = await db.places
 		.update()
@@ -129,13 +157,13 @@ async function handlePost(
 
 	await Promise.all(
 		imagesToRemove.map(async ({ id }) => {
-			await imagesClient.delete(`/images/v1/${id}`);
+			await deleteObject(buildPlaceImageKey(slug, id));
 		}),
 	);
 
 	await db.placesImages.delete().where(where).execute();
 
-	const imagesToUpload = await createUploadUrls(newImages.length);
+	const imagesToUpload = await createUploadUrls(newImages.length, slug);
 
 	const imagesToInsert: InferModel<typeof placesImages, 'insert'>[] =
 		imagesToUpload.map((img) => ({
@@ -150,6 +178,7 @@ async function handlePost(
 
 	res.status(200).json({
 		images: imagesToUpload.map(({ uploadURL }) => uploadURL),
+		previewURL,
 	});
 }
 
@@ -160,16 +189,16 @@ async function handleDelete(
 	const db = await getConnection();
 	const slug = req.query['slug'] as string;
 
-	await db.placesImages
-		.delete()
-		.where(eq(placesImages.placeSlug, slug))
-		.execute();
+	await Promise.all([
+		db.placesImages
+			.delete()
+			.where(eq(placesImages.placeSlug, slug))
+			.execute(),
 
-	await db.places.delete().where(eq(places.slug, slug)).execute();
-	await db.placesImages
-		.delete()
-		.where(eq(placesImages.placeSlug, slug))
-		.execute();
+		db.places.delete().where(eq(places.slug, slug)).execute(),
+
+		deleteObjectsWithPrefix(buildPlacePrefix(slug)),
+	]);
 
 	res.status(200).json({ message: 'Place deleted' });
 }

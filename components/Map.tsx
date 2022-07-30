@@ -1,6 +1,7 @@
 import L, { DragEndEventHandlerFn } from 'leaflet';
+import leafletImage from 'leaflet-image';
 import Image from 'next/image';
-import { FC, forwardRef, useEffect, useState } from 'react';
+import { FC, memo, useEffect, useState } from 'react';
 import { MapContainer as MapContainerDefault, Marker as LeafletMarker, TileLayer } from 'react-leaflet';
 
 import { styled } from '@stitches/react';
@@ -22,15 +23,24 @@ interface ViewModeProps {
 	setMarkerLocation?: undefined;
 }
 
+export interface MapRef {
+	map: L.Map;
+	getPreview: typeof getPreview;
+}
+
 type Props = (EditModeProps | ViewModeProps) & {
-	mapRef?: (map: L.Map) => void;
+	mapRef?: (ref: MapRef | null) => void;
 };
 
-const Map: FC<Props> = ({ mapRef, ...props }) => {
-	const [map, setMap] = useState<L.Map>();
-	const setMapRef = (map: L.Map) => {
-		setMap(map);
-		mapRef?.(map);
+const Map = memo<Props>(({ mapRef, ...props }) => {
+	const [map, setMapRaw] = useState<L.Map | null>();
+	const setMapRef = (map: L.Map | null) => {
+		setMapRaw(map);
+		if (!map) {
+			mapRef?.(null);
+		} else {
+			mapRef?.({ map, getPreview });
+		}
 	};
 
 	const { setMarkerLocation } = props;
@@ -128,13 +138,15 @@ const Map: FC<Props> = ({ mapRef, ...props }) => {
 						src={MarkerSvg.src}
 						width={MarkerSvg.width / 2}
 						height={MarkerSvg.height / 2}
-						alt='marker'
+						alt='Marker'
 					/>
 				</Marker>
 			)}
 		</Root>
 	);
-};
+});
+
+Map.displayName = 'Map';
 
 export default Map;
 
@@ -142,6 +154,12 @@ const MarkerIcon = new L.Icon({
 	iconUrl: MarkerSvg.src,
 	iconSize: [MarkerSvg.width / 2, MarkerSvg.height / 2],
 	iconAnchor: [24, 28],
+});
+
+export const MarkerIconStatic = new L.Icon({
+	iconUrl: MarkerSvg.src,
+	iconSize: [MarkerSvg.width / 2, MarkerSvg.height / 2],
+	iconAnchor: [7, 28],
 });
 
 const Root = styled('div', {
@@ -178,3 +196,45 @@ const Marker = styled('div', {
 		transform: 'translate(calc(-50% - 8px), calc(-50% - 10px))',
 	},
 });
+
+async function getPreview(location: PlaceLocation): Promise<Blob> {
+	const container = document.createElement('div');
+	const style: Partial<CSSStyleDeclaration> = {
+		width: `${theme.sizes.mapPreviewWidth}`,
+		height: `${theme.sizes.mapHeight}`,
+		position: 'absolute',
+		top: '0',
+		left: '0',
+		pointerEvents: 'none',
+		zIndex: '-1',
+		opacity: '0',
+	};
+	Object.assign(container.style, style);
+
+	document.body.appendChild(container);
+
+	const staticMap = L.map(container, {
+		zoom: 17,
+		preferCanvas: true,
+		center: location,
+		attributionControl: false,
+		renderer: L.canvas(),
+	});
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(staticMap);
+	L.marker(location, { icon: MarkerIconStatic }).addTo(staticMap);
+
+	return new Promise((resolve, reject) => {
+		leafletImage(staticMap, (err, canvas) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+
+			canvas.toBlob((blob) => {
+				document.body.removeChild(container);
+				staticMap.remove();
+				resolve(blob!);
+			});
+		});
+	});
+}

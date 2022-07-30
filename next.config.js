@@ -2,7 +2,7 @@
 const nextConfig = {
 	reactStrictMode: true,
 	images: {
-		domains: ['imagedelivery.net'],
+		domains: ['pathtrami.s3.amazonaws.com'],
 	},
 };
 

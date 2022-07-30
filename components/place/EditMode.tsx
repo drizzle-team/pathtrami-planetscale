@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from 'react-query';
 import { v4 as uuid } from 'uuid';
 
 import { Credentials } from 'google-auth-library';
+import { MapRef } from '~/components/Map';
 import { MapContainer, Root } from '~/pages/[slug]';
 import { Place, PlaceLocation } from '~/pages/api/places';
 import { SavePlaceRequest, UpdatePlaceResponse } from '~/pages/api/places/[slug]';
@@ -54,12 +55,15 @@ interface PlaceFormData {
 	images: ImageData[];
 }
 
-async function uploadImages(uploadUrls: string[], images: NewImageData[]) {
+async function uploadImages(uploadUrls: string[], files: Blob[]) {
 	await Promise.all(
 		uploadUrls.map(async (url) => {
-			const formData = new FormData();
-			formData.append('file', images.shift()!.file);
-			await axios.post(url, formData);
+			const file = files.shift()!;
+			await axios.put(url, file, {
+				headers: {
+					'Content-Type': file.type,
+				},
+			});
 		}),
 	);
 }
@@ -73,10 +77,9 @@ const EditMode: FC<EditModeProps> = ({
 	const router = useRouter();
 
 	const [locationSelectionActive, setLocationSelectionActive] = useState(false);
-
 	const [deleteConfirmationActive, setDeleteConfirmationActive] = useState(false);
-
 	const [fileInputKey, setFileInputKey] = useState(uuid());
+	const [mapRef, setMapRef] = useState<MapRef | null>(null);
 
 	const googleLoginMutation = useMutation(async (code: string) => {
 		return apiClient.post<Credentials>('/auth/google', {
@@ -122,9 +125,11 @@ const EditMode: FC<EditModeProps> = ({
 					.then(({ data }) => data);
 				slug = place.slug;
 
+				const preview = await mapRef!.getPreview(formData.location);
+
 				await uploadImages(
-					place.images.map(({ url }) => url),
-					newImages,
+					[...place.images.map(({ url }) => url), place.previewURL],
+					[...newImages.map(({ file }) => file), preview],
 				);
 			} else {
 				// Update existing place
@@ -153,7 +158,17 @@ const EditMode: FC<EditModeProps> = ({
 				>(`/places/${place.slug}`, requestData)
 					.then(({ data }) => data);
 
-				await uploadImages(response.images, newImages);
+				const images = response.images;
+				const blobs: Blob[] = newImages.map(({ file }) => file);
+
+				if (response.previewURL) {
+					const preview = await mapRef!.getPreview(formData.location);
+
+					images.push(response.previewURL);
+					blobs.push(preview);
+				}
+
+				await uploadImages(images, blobs);
 			}
 
 			return slug;
@@ -277,6 +292,7 @@ const EditMode: FC<EditModeProps> = ({
 				<div className='content'>
 					<MapContainer>
 						<Map
+							mapRef={setMapRef}
 							mode='view'
 							static
 							markerLocation={form.values.location}

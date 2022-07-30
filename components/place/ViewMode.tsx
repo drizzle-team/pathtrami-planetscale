@@ -2,7 +2,7 @@ import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { FC, memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 import { MapContainer, Root } from '~/pages/[slug]';
