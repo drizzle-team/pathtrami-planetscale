@@ -153,7 +153,7 @@ export default Map;
 const MarkerIcon = new L.Icon({
 	iconUrl: MarkerSvg.src,
 	iconSize: [MarkerSvg.width / 2, MarkerSvg.height / 2],
-	iconAnchor: [24, 28],
+	iconAnchor: [12, 30],
 });
 
 export const MarkerIconStatic = new L.Icon({
@@ -185,7 +185,7 @@ const Marker = styled('div', {
 	position: 'absolute',
 	top: '50%',
 	left: '50%',
-	transform: 'translate(calc(-50% - 8px), calc(-50% - 6px))',
+	transform: 'translate(calc(-50% + 4px), calc(-50% - 9px))',
 	zIndex: 401,
 	pointerEvents: 'none',
 	userSelect: 'none',
@@ -193,7 +193,7 @@ const Marker = styled('div', {
 
 	'.leaflet-dragging &': {
 		filter: 'drop-shadow(0 5px 3px rgba(0, 0, 0, .7))',
-		transform: 'translate(calc(-50% - 8px), calc(-50% - 10px))',
+		transform: 'translate(calc(-50% + 4px), calc(-50% - 12px))',
 	},
 });
 
