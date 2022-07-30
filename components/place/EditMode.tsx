@@ -81,7 +81,7 @@ const EditMode: FC<EditModeProps> = ({
 	const [fileInputKey, setFileInputKey] = useState(uuid());
 	const [mapRef, setMapRef] = useState<MapRef | null>(null);
 
-	const locationSelectionActive = router.query['slug']![2] === 'location';
+	const locationSelectionActive = router.query['slug']?.[2] === 'location';
 
 	const googleLoginMutation = useMutation(async (code: string) => {
 		return apiClient.post<Credentials>('/auth/google', {
