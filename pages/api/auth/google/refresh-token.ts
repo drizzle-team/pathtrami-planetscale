@@ -12,7 +12,7 @@ export default async function handler(
 	}
 
 	const user = new UserRefreshClient(
-		process.env.GOOGLE_CLIENT_ID,
+		process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
 		process.env.GOOGLE_CLIENT_SECRET,
 		authorization.replace('Bearer ', ''),
 	);

@@ -1,6 +1,5 @@
 import {
 	DeleteObjectCommand,
-	ListObjectsV2Command,
 	paginateListObjectsV2,
 	PutObjectCommand,
 	S3Client,
@@ -8,7 +7,13 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuid } from 'uuid';
 
-const S3 = new S3Client({});
+const S3 = new S3Client({
+	credentials: {
+		accessKeyId: process.env.CUSTOM_AWS_ACCESS_KEY_ID,
+		secretAccessKey: process.env.CUSTOM_AWS_SECRET_ACCESS_KEY,
+	},
+	region: process.env.CUSTOM_AWS_REGION,
+});
 
 export type UploadImageResponse = {
 	uploadURL: string;
