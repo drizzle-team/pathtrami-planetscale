@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { desc, eq } from 'drizzle-orm/expressions';
+import { InferModel } from 'drizzle-orm-mysql';
 
 import { getConnection } from '~/utils/db';
 import { placesImages } from '~/models/places_images';
 import { places } from '~/models/places';
-import { InferModel } from 'drizzle-orm-mysql';
 import { SavePlaceRequest } from './[slug]';
 import { getCurrentUserId } from '~/utils/auth';
 import {
@@ -94,29 +94,6 @@ export async function aggregatePlaces(
 
 	return result;
 }
-
-// export async function createUploadUrls(
-// 	filesCount: number,
-// ): Promise<UploadUrlsResponse> {
-// 	return await Promise.all(
-// 		Array.from({ length: filesCount }, async () => {
-// 			const { id, uploadURL } = await imagesClient
-// 				.post<{ result: { id: string; uploadURL: string } }>(
-// 					`/images/v2/direct_upload`,
-// 				)
-// 				.then(({ data }) => data.result);
-// 			const serveURL = await imagesClient
-// 				.get<{ result: { variants: [string] } }>(`/images/v1/${id}`)
-// 				.then(({ data }) => data.result.variants[0]);
-
-// 			return {
-// 				id,
-// 				uploadURL,
-// 				serveURL,
-// 			};
-// 		}),
-// 	);
-// }
 
 export default async function handler(
 	req: NextApiRequest,
