@@ -5,14 +5,15 @@ import axios, { AxiosResponse } from 'axios';
 import { useFormik } from 'formik';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ChangeEventHandler, FC, useState } from 'react';
+import { ChangeEventHandler, FC, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { v4 as uuid } from 'uuid';
 
 import { Credentials } from 'google-auth-library';
 import { MapRef } from '~/components/Map';
-import { MapContainer, Root } from '~/pages/[slug]';
+import { MapContainer, Root } from '~/pages/[...slug]';
 import { Place, PlaceLocation } from '~/pages/api/places';
 import { SavePlaceRequest, UpdatePlaceResponse } from '~/pages/api/places/[slug]';
 import { styled } from '~/stitches.config';
@@ -76,10 +77,11 @@ const EditMode: FC<EditModeProps> = ({
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
-	const [locationSelectionActive, setLocationSelectionActive] = useState(false);
 	const [deleteConfirmationActive, setDeleteConfirmationActive] = useState(false);
 	const [fileInputKey, setFileInputKey] = useState(uuid());
 	const [mapRef, setMapRef] = useState<MapRef | null>(null);
+
+	const locationSelectionActive = router.query['slug']![2] === 'location';
 
 	const googleLoginMutation = useMutation(async (code: string) => {
 		return apiClient.post<Credentials>('/auth/google', {
@@ -218,7 +220,7 @@ const EditMode: FC<EditModeProps> = ({
 		address: string;
 		location: PlaceLocation;
 	}) => {
-		setLocationSelectionActive(false);
+		router.back();
 		form.setFieldValue('address', address);
 		form.setFieldValue('location', location);
 	};
@@ -298,9 +300,13 @@ const EditMode: FC<EditModeProps> = ({
 							markerLocation={form.values.location}
 						/>
 						{!savePlaceMutation.isLoading && (
-							<EditMapButton size='sm' onClick={() => setLocationSelectionActive(true)}>
-								Edit
-							</EditMapButton>
+							<Link href={`${router.asPath}/location`} shallow>
+								<a>
+									<EditMapButton size='sm'>
+										Edit
+									</EditMapButton>
+								</a>
+							</Link>
 						)}
 					</MapContainer>
 					<div>
@@ -378,7 +384,7 @@ const EditMode: FC<EditModeProps> = ({
 					address={form.values.address}
 					location={form.values.location}
 					onSave={handleAddressChange}
-					onCancel={() => setLocationSelectionActive(false)}
+					onCancel={() => router.back()}
 				/>
 			)}
 		</>

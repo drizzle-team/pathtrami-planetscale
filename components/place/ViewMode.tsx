@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { memo, useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
-import { MapContainer, Root } from '~/pages/[slug]';
+import { useRouter } from 'next/router';
+import { MapContainer, Root } from '~/pages/[...slug]';
 import { Place } from '~/pages/api/places';
 import { styled } from '~/stitches.config';
 import Button from '../Button';
@@ -16,11 +17,11 @@ const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 interface ViewModeProps {
 	place: Place;
 	editable: boolean;
-	setEditMode: () => void;
 }
 
 const ViewMode = memo<ViewModeProps>(
-	({ editable, place, setEditMode }: ViewModeProps) => {
+	({ editable, place }: ViewModeProps) => {
+		const router = useRouter();
 		const [currentImage, setCurrentImage] = useState<number>();
 
 		const description = useMemo(
@@ -35,13 +36,16 @@ const ViewMode = memo<ViewModeProps>(
 			<Root>
 				<Header
 					actions={editable && (
-						<Button
-							size='sm'
-							icon={<FontAwesomeIcon icon={faPenToSquare} />}
-							onClick={setEditMode}
-						>
-							Edit
-						</Button>
+						<Link href={`${router.asPath}/edit`} shallow>
+							<a>
+								<Button
+									size='sm'
+									icon={<FontAwesomeIcon icon={faPenToSquare} />}
+								>
+									Edit
+								</Button>
+							</a>
+						</Link>
 					)}
 				/>
 				<div className='content'>
@@ -78,6 +82,7 @@ const ViewMode = memo<ViewModeProps>(
 									src={image.url}
 									alt={`Instructions ${i + 1}`}
 									layout='fill'
+									priority
 								/>
 							</div>
 						))}

@@ -19,11 +19,22 @@ interface Props {
 const LocationPage: NextPage<Props> = ({ place }) => {
 	const router = useRouter();
 
-	const [mode, setMode] = useState<'view' | 'edit'>('view');
 	const [editable, setEditable] = useState(false);
 
+	const [, ...restPath] = router.query['slug'] as string[];
+
+	const setViewMode = () => {
+		router.push(`/${place.slug}`);
+	};
+
+	const handleEditCancel = () => {
+		router.back();
+	};
+
+	const mode = restPath[0] === 'edit' ? 'edit' : restPath.length === 0 ? 'view' : undefined;
+
 	useQuery(
-		['places', router.query['slug'], 'editable'],
+		['places', place.slug, 'editable'],
 		async () => {
 			return apiClient.get<boolean>(
 				`/places/${place.slug}/editable`,
@@ -38,7 +49,7 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 
 	const handlePlaceUpdated = () => {
 		router.replace(router.asPath);
-		setMode('view');
+		setViewMode();
 	};
 
 	const title = `${place.name} - Pathtrami`;
@@ -75,14 +86,13 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 					<ViewMode
 						place={place}
 						editable={editable}
-						setEditMode={() => setMode('edit')}
 					/>
 				)
 				: (
 					<EditMode
 						place={place}
 						onSave={handlePlaceUpdated}
-						onCancel={() => setMode('view')}
+						onCancel={handleEditCancel}
 					/>
 				)}
 		</>
@@ -92,7 +102,7 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 export default LocationPage;
 
 export const getServerSideProps: GetServerSideProps = async ({ query, res }) => {
-	const place = await getPlace(query['slug'] as string);
+	const place = await getPlace(query['slug']![0]!);
 
 	if (!place) {
 		return {
