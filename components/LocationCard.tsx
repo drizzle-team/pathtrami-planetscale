@@ -24,6 +24,7 @@ const LocationCard: FC<Props> = ({ name, address, previewURL, location, slug }) 
 			<a>
 				<Root>
 					<div className='preview'>
+						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img src={previewURL} alt={name} />
 					</div>
 					<TextWrapper>

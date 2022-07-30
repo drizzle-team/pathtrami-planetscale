@@ -41,10 +41,13 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 		setMode('view');
 	};
 
+	console.log(router);
+
 	const title = `${place.name} - Pathtrami`;
+	const host = 'https://pathtrami.vercel.app';
 	const description =
-		'Sharing a place location has never been easier! Visit https://pathtrami.fly.dev and share your first place in 5 minutes.';
-	const url = `https://pathtrami.fly.dev/${place.slug}`;
+		`Sharing a place location has never been easier! Visit ${host} and share your first place in 5 minutes.`;
+	const url = `${host}/${place.slug}`;
 
 	return (
 		<>
