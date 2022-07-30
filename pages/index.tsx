@@ -4,6 +4,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { Credentials } from 'google-auth-library';
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import NProgress from 'nprogress';
 import { useMutation, useQuery } from 'react-query';
 
 import Button from '~/components/Button';
@@ -41,9 +42,16 @@ const Home: NextPage = () => {
 	});
 
 	const placesQuery = useQuery('places', async () => {
+		NProgress.start();
 		const { data } = await apiClient.get<Place[]>('/places');
+
 		return data;
-	}, { enabled: isAuthenticated });
+	}, {
+		enabled: isAuthenticated,
+		onSettled() {
+			NProgress.done();
+		},
+	});
 
 	return (
 		<Root>

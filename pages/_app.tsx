@@ -2,11 +2,14 @@ import { config } from '@fortawesome/fontawesome-svg-core';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { globalCss } from '@stitches/react';
 import type { AppProps } from 'next/app';
+import Router from 'next/router';
+import NProgress from 'nprogress';
 import { ReactElement, ReactNode } from 'react';
 import { QueryClientProvider } from 'react-query';
 
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import 'normalize.css/normalize.css';
+import 'nprogress/nprogress.css';
 
 import { NextPage } from 'next';
 import { styled, theme } from '~/stitches.config';
@@ -21,6 +24,20 @@ export type NextPageWithLayout = NextPage & {
 type AppPropsWithLayout = AppProps & {
 	Component: NextPageWithLayout;
 };
+
+NProgress.configure({
+	showSpinner: false,
+});
+
+function loadingDone() {
+	NProgress.done();
+}
+
+Router.events.on('routeChangeStart', () => {
+	NProgress.start();
+});
+Router.events.on('routeChangeComplete', loadingDone);
+Router.events.on('routeChangeError', loadingDone);
 
 function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 	globalStyles();

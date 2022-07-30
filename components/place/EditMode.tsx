@@ -7,9 +7,13 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ChangeEventHandler, FC, useEffect, useState } from 'react';
+import NProgress from 'nprogress';
+import { ChangeEventHandler, FC, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
+import { toast, ToastContainer } from 'react-toastify';
 import { v4 as uuid } from 'uuid';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Credentials } from 'google-auth-library';
 import { MapRef } from '~/components/Map';
@@ -104,6 +108,8 @@ const EditMode: FC<EditModeProps> = ({
 
 	const savePlaceMutation = useMutation(
 		async (formData: PlaceFormData) => {
+			NProgress.start();
+
 			let slug: string;
 
 			const newImages = formData.images.filter(
@@ -179,6 +185,17 @@ const EditMode: FC<EditModeProps> = ({
 			onSuccess(slug) {
 				queryClient.invalidateQueries('places');
 				onSave(place?.slug ?? slug);
+			},
+			onError() {
+				toast(
+					<>
+						Whoops, something went wrong :(<br /> Please try again!
+					</>,
+					{ type: 'error' },
+				);
+			},
+			onSettled() {
+				NProgress.done();
 			},
 		},
 	);
@@ -387,6 +404,14 @@ const EditMode: FC<EditModeProps> = ({
 					onCancel={() => router.back()}
 				/>
 			)}
+
+			<ToastContainer
+				position='bottom-right'
+				theme='dark'
+				autoClose={3000}
+				hideProgressBar
+				newestOnTop
+			/>
 		</>
 	);
 };
