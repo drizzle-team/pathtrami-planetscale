@@ -65,7 +65,6 @@ const globalStyles = globalCss({
 
 	html: {
 		height: '100%',
-		minHeight: '100%',
 	},
 
 	body: {
