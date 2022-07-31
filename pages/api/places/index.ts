@@ -1,12 +1,7 @@
 import { InferModel } from 'drizzle-orm-mysql';
 import { NextApiRequest, NextApiResponse } from 'next';
-import {
-	addImagesToPlace,
-	createPlace,
-	DbPlaceImage,
-	getOnePlaceBySlug,
-	getUserPlacesWithImages,
-} from '~/datalayer/places';
+import { addImagesToPlace } from '~/datalayer/placeImages';
+import { createPlace, DbPlaceImage, getOnePlaceBySlug, getUserPlacesWithImages } from '~/datalayer/places';
 
 import { places } from '~/models/places';
 import { placesImages } from '~/models/places_images';
