@@ -147,8 +147,8 @@ const Home: NextPage = () => {
 					</Button>
 				</div>
 				<div className='attribution'>
-					Created for <a href='https://planetscale.com/' target='_blank' rel='noreferrer'>PlanetScale</a> &{' '}
-					<a href='https://hashnode.com/' target='_blank' rel='noreferrer'>Hashnode</a> July 2022 hackathon
+					Created for <a href='https://planetscale.com/?utm_source=hashnode&utm_medium=hackathon&utm_campaign=announcement_article' target='_blank' rel='noreferrer'>PlanetScale</a> &{' '}
+					<a href='https://hashnode.com/?source=planetscale_hackathon_announcement' target='_blank' rel='noreferrer'>Hashnode</a> July 2022 hackathon
 				</div>
 			</div>
 		</Root>
