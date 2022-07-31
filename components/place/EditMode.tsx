@@ -61,13 +61,24 @@ interface PlaceFormData {
 	images: ImageData[];
 }
 
-async function uploadImages(uploadUrls: string[], files: Blob[]) {
+type UploadImageFileConfig = Blob | {
+	blob: Blob;
+	options: {
+		noCache?: boolean;
+	};
+};
+
+async function uploadImages(uploadUrls: string[], files: UploadImageFileConfig[]) {
 	await Promise.all(
 		uploadUrls.map(async (url) => {
-			const file = files.shift()!;
+			const config = files.shift()!;
+			let file = config instanceof Blob ? config : config.blob;
+			const options = config instanceof Blob ? {} : config.options;
+
 			await axios.put(url, file, {
 				headers: {
 					'Content-Type': file.type,
+					...(options.noCache ? { 'Cache-Control': 'no-cache' } : {}),
 				},
 			});
 		}),
@@ -139,7 +150,7 @@ const EditMode: FC<Props> = ({
 
 				await uploadImages(
 					[...place.images.map(({ url }) => url), place.previewURL],
-					[...newImages.map(({ file }) => file), preview],
+					[...newImages.map(({ file }) => file), { blob: preview, options: { noCache: true } }],
 				);
 			} else {
 				// Update existing place
@@ -169,13 +180,16 @@ const EditMode: FC<Props> = ({
 					.then(({ data }) => data);
 
 				const images = response.images;
-				const blobs: Blob[] = newImages.map(({ file }) => file);
+				const blobs: UploadImageFileConfig[] = newImages.map(({ file }) => file);
 
 				if (response.previewURL) {
 					const preview = await mapRef!.getPreview(formData.location);
 
 					images.push(response.previewURL);
-					blobs.push(preview);
+					blobs.push({
+						blob: preview,
+						options: { noCache: true },
+					});
 				}
 
 				await uploadImages(images, blobs);
