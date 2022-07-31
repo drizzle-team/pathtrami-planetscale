@@ -9,7 +9,6 @@ specifiers:
   '@types/google.accounts': ^0.0.2
   '@types/google.maps': ^3.49.2
   '@types/leaflet': ^1.7.11
-  '@types/lodash.debounce': ^4.0.7
   '@types/lodash.isequal': ^4.5.6
   '@types/lodash.once': ^4.1.7
   '@types/node': 18.0.0
@@ -31,7 +30,6 @@ specifiers:
   immer: ^9.0.15
   leaflet: ^1.8.0
   leaflet-image: ^0.4.0
-  lodash.debounce: ^4.0.8
   lodash.isequal: ^4.5.0
   lodash.once: ^4.1.1
   mysql2: ^2.3.3
@@ -66,7 +64,6 @@ dependencies:
   immer: 9.0.15
   leaflet: 1.8.0
   leaflet-image: 0.4.0
-  lodash.debounce: 4.0.8
   lodash.isequal: 4.5.0
   lodash.once: 4.1.1
   mysql2: 2.3.3
@@ -90,7 +87,6 @@ devDependencies:
   '@types/google.accounts': 0.0.2
   '@types/google.maps': 3.49.2
   '@types/leaflet': 1.7.11
-  '@types/lodash.debounce': 4.0.7
   '@types/lodash.isequal': 4.5.6
   '@types/lodash.once': 4.1.7
   '@types/node': 18.0.0
@@ -1542,12 +1538,6 @@ packages:
     resolution: {integrity: sha512-VwAYom2pfIAf/pLj1VR5aLltd4tOtHyvfaJlNYCoejzP2nu52PrMi1ehsLRMUS+bgafmIIKBV1cMfKeS+uJ0Vg==}
     dependencies:
       '@types/geojson': 7946.0.10
-    dev: true
-
-  /@types/lodash.debounce/4.0.7:
-    resolution: {integrity: sha512-X1T4wMZ+gT000M2/91SYj0d/7JfeNZ9PeeOldSNoE/lunLeQXKvkmIumI29IaKMotU/ln/McOIvgzZcQ/3TrSA==}
-    dependencies:
-      '@types/lodash': 4.14.182
     dev: true
 
   /@types/lodash.isequal/4.5.6:
@@ -3229,10 +3219,6 @@ packages:
 
   /lodash-es/4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
-    dev: false
-
-  /lodash.debounce/4.0.8:
-    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
     dev: false
 
   /lodash.isequal/4.5.0:

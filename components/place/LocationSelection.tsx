@@ -1,6 +1,5 @@
-import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
-import { FC, FocusEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, FocusEventHandler, useCallback, useEffect, useState } from 'react';
 import { MapRef } from '~/components/Map';
 
 import Image from 'next/image';
@@ -8,7 +7,6 @@ import { PlaceLocation } from '~/pages/api/places';
 import Navigation from '~/public/crosshair.svg';
 import { styled, theme } from '~/stitches.config';
 import Button from '../Button';
-import Input from '../Input';
 
 const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 
@@ -28,8 +26,6 @@ const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 	>(null);
 	const [autocompleteMenu, setAutocompleteMenu] = useState<HTMLDivElement | null>(null);
 	const [mapRef, setMapRef] = useState<MapRef | null>(null);
-	const [autocomplete, setAutocomplete] = useState<google.maps.places.AutocompleteService>();
-	const [autocompleteResults, setAutocompleteResults] = useState<google.maps.places.AutocompletePrediction[]>([]);
 
 	const handleInputFocus: FocusEventHandler = (e) => {
 		setIsAutocompleteOpen(true);
@@ -50,22 +46,6 @@ const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 	const handleSave = () => {
 		onSave({ address, location: location! });
 	};
-
-	// const updateAutocomplete = useMemo(() =>
-	// 	debounce((input: string) => {
-	// 		if (!autocomplete) {
-	// 			return;
-	// 		}
-
-	// 		autocomplete.getPlacePredictions(
-	// 			{ input },
-	// 			(predictions, status) => {
-	// 				if (status === 'OK') {
-	// 					setAutocompleteMenu(predictions);
-	// 				}
-	// 			},
-	// 		);
-	// 	}, 500), [autocomplete]);
 
 	useEffect(() => {
 		function handler(e: TouchEvent | MouseEvent) {
@@ -89,10 +69,6 @@ const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 		};
 	});
 
-	// useEffect(() => {
-	// 	setAutocomplete(new google.maps.places.AutocompleteService());
-	// }, [setAutocomplete]);
-
 	useEffect(() => {
 		if (!location) {
 			handleCurrentLocation();
@@ -101,30 +77,6 @@ const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 
 	return (
 		<Root>
-			{
-				/* <div className='address-container'>
-				<Input
-					ref={setInput}
-					className='input'
-					label='Choose address'
-					value={address}
-					onChange={(e) => setAddress(e.target.value)}
-					onFocus={handleInputFocus}
-					readOnly
-				/>
-				<div
-					ref={setAutocompleteMenu}
-					className='autocomplete-menu'
-					style={{
-						display: isAutocompleteOpen ? 'block' : undefined,
-					}}
-				>
-					<div className='item' onClick={handleCurrentLocation}>
-						<FontAwesomeIcon icon={faLocationDot} /> Use current location
-					</div>
-				</div>
-			</div> */
-			}
 			<div className='map-container'>
 				<Map
 					mapRef={setMapRef}
@@ -187,7 +139,6 @@ const Root = styled('div', {
 
 	'.map-container': {
 		flex: 1,
-		// marginTop: 20,
 		position: 'relative',
 
 		'.current-location-button': {
@@ -195,7 +146,6 @@ const Root = styled('div', {
 			right: 20,
 			bottom: 20,
 			zIndex: 1001,
-			// borderRadius: '50%',
 			width: 48,
 			height: 48,
 			padding: 0,
