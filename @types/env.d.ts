@@ -10,6 +10,8 @@ declare module 'process' {
 				CUSTOM_AWS_ACCESS_KEY_ID: string;
 				CUSTOM_AWS_SECRET_ACCESS_KEY: string;
 				CUSTOM_AWS_REGION: string;
+				NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: string;
+				NEXT_PUBLIC_SHOW_LOGOUT_BUTTON?: string;
 			}
 		}
 	}

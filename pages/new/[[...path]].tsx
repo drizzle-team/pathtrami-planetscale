@@ -7,7 +7,7 @@ const New: NextPage = () => {
 	const router = useRouter();
 
 	const handleCancel = () => {
-		router.push('/');
+		router.back();
 	};
 
 	const handleSave = (slug: string) => {

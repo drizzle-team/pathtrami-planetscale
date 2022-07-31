@@ -20,6 +20,7 @@ export const { styled, getCssText, theme } = createStitches({
 		fontSizes: {
 			text: '16px',
 			button: '14px',
+			sm: '12px',
 		},
 		fontWeights: {
 			text: 400,

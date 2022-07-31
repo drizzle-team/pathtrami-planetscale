@@ -1,4 +1,3 @@
-import { config } from '@fortawesome/fontawesome-svg-core';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { globalCss } from '@stitches/react';
 import type { AppProps } from 'next/app';
@@ -7,15 +6,12 @@ import NProgress from 'nprogress';
 import { ReactElement, ReactNode } from 'react';
 import { QueryClientProvider } from 'react-query';
 
-import '@fortawesome/fontawesome-svg-core/styles.css';
 import 'normalize.css/normalize.css';
 import 'nprogress/nprogress.css';
 
 import { NextPage } from 'next';
 import { styled, theme } from '~/stitches.config';
 import queryClient from '~/utils/queryClient';
-
-config.autoAddCss = false;
 
 export type NextPageWithLayout = NextPage & {
 	getLayout?: (page: ReactElement) => ReactNode;
@@ -63,9 +59,13 @@ const globalStyles = globalCss({
 		boxSizing: 'border-box',
 	},
 
+	html: {
+		height: '100%',
+	},
+
 	body: {
 		width: '100vw',
-		height: '100vh',
+		height: '100%',
 		backgroundColor: theme.colors.bg,
 		fontFamily: theme.fonts.system,
 		fontWeight: theme.fontWeights.text,

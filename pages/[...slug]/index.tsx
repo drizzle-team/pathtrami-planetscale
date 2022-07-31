@@ -178,7 +178,8 @@ export const Root = styled('div', {
 			cursor: 'pointer',
 
 			'&.new': {
-				border: '1px dashed #FFF',
+				color: theme.colors.text,
+				border: `1px dashed  ${theme.colors.text}`,
 				userSelect: 'none',
 				gap: 5,
 				backgroundColor: theme.colors.bgDarkAlt,

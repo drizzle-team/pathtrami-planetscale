@@ -41,6 +41,16 @@ const Root = styled('button', {
 				height: 48,
 			},
 		},
+		noPadding: {
+			true: {
+				padding: 0,
+			},
+		},
+		noBorder: {
+			true: {
+				border: 0,
+			},
+		},
 		variant: {
 			primary: {
 				color: theme.colors.textAlt,
@@ -49,7 +59,6 @@ const Root = styled('button', {
 			secondary: {
 				color: theme.colors.text,
 				backgroundColor: theme.colors.bgButtonSecondary,
-				border: '1px solid #FFF',
 			},
 			cta: {
 				color: theme.colors.textAlt,
@@ -65,5 +74,5 @@ const Root = styled('button', {
 });
 
 const IconWrapper = styled('span', {
-	marginRight: 10,
+	marginRight: 5,
 });
