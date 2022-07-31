@@ -1,34 +1,31 @@
 import { useGoogleLogin } from '@react-oauth/google';
 import axios, { AxiosResponse } from 'axios';
 import { useFormik } from 'formik';
+import { Credentials } from 'google-auth-library';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import NProgress from 'nprogress';
-import { ChangeEventHandler, FC, useState } from 'react';
+import { ChangeEventHandler, FC, useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { toast, ToastContainer } from 'react-toastify';
 import { v4 as uuid } from 'uuid';
 
 import 'react-toastify/dist/ReactToastify.css';
 
-import { Credentials } from 'google-auth-library';
-import Script from 'next/script';
-import { MapRef } from '~/components/Map';
 import { MapContainer, Root } from '~/pages/[...slug]';
 import { Place, PlaceLocation } from '~/pages/api/places';
 import { SavePlaceRequest, UpdatePlaceResponse } from '~/pages/api/places/[slug]';
+import MarkerSvg from '~/public/marker_old.svg';
 import Plus from '~/public/plus_white.svg';
 import X from '~/public/x.svg';
-import { styled } from '~/stitches.config';
+import { styled, theme } from '~/stitches.config';
 import { apiClient, isAuthenticated, setGoogleAuth } from '~/utils/apiClient';
 import Button from '../Button';
 import Header from '../Header';
 import Input from '../Input';
 import LocationSelection from './LocationSelection';
-
-const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 
 interface Props {
 	place?: Place;
@@ -55,11 +52,13 @@ interface OldImageData extends ImageDataBase {
 type ImageData = NewImageData | OldImageData;
 
 interface PlaceFormData {
-	location?: PlaceLocation | undefined;
+	location: PlaceLocation | undefined;
 	name: string;
 	address: string;
 	description: string;
 	images: ImageData[];
+	previewBlob?: Blob | undefined;
+	previewURL?: string | undefined;
 }
 
 type UploadImageFileConfig = Blob | {
@@ -97,7 +96,7 @@ const EditMode: FC<Props> = ({
 
 	const [deleteConfirmationActive, setDeleteConfirmationActive] = useState(false);
 	const [fileInputKey, setFileInputKey] = useState(uuid());
-	const [mapRef, setMapRef] = useState<MapRef | null>(null);
+	const [previewLoading, setPreviewLoading] = useState(false);
 
 	const locationSelectionActive = pathChunks.slice(-1)[0] === 'location';
 
@@ -132,6 +131,8 @@ const EditMode: FC<Props> = ({
 
 			const location = formData.location ?? { lat: 0, lng: 0 };
 
+			const { getPreview } = await import('~/components/Map');
+
 			if (!place) {
 				// Create new place
 
@@ -150,7 +151,7 @@ const EditMode: FC<Props> = ({
 					.then(({ data }) => data);
 				slug = place.slug;
 
-				const preview = await mapRef!.getPreview(location);
+				const preview = form.values.previewBlob ?? await getPreview(location);
 
 				await uploadImages(
 					[...place.images.map(({ url }) => url), place.previewURL],
@@ -187,9 +188,9 @@ const EditMode: FC<Props> = ({
 				const images = response.images;
 				const blobs: UploadImageFileConfig[] = newImages.map(({ file }) => file);
 
-				if (response.previewURL) {
-					const preview = await mapRef!.getPreview(location);
+				const preview = form.values.previewBlob ?? await getPreview(location);
 
+				if (response.previewURL) {
 					images.push(response.previewURL);
 					blobs.push({
 						blob: preview,
@@ -247,6 +248,7 @@ const EditMode: FC<Props> = ({
 				url,
 				type: 'old',
 			})) ?? [],
+			previewURL: place?.previewURL,
 		},
 		onSubmit: handleSubmit,
 	});
@@ -261,6 +263,7 @@ const EditMode: FC<Props> = ({
 		router.back();
 		form.setFieldValue('address', address);
 		form.setFieldValue('location', location);
+		updatePreview(location);
 	};
 
 	const handleDeleteButtonClick = () => {
@@ -304,12 +307,27 @@ const EditMode: FC<Props> = ({
 		form.setFieldValue('images', form.values.images.filter(({ id: imageId }) => imageId !== id));
 	};
 
+	const updatePreview = useCallback((location: PlaceLocation) => {
+		(async (setFieldValue) => {
+			if (!location) {
+				return;
+			}
+			setPreviewLoading(true);
+			setFieldValue('previewBlob', undefined);
+			setFieldValue('previewURL', undefined);
+			const { getPreview } = await import('~/components/Map');
+			const preview = await getPreview(location);
+			const previewURL = URL.createObjectURL(preview);
+			setFieldValue('previewBlob', preview);
+			setFieldValue('previewURL', previewURL);
+			setPreviewLoading(false);
+		})(form.setFieldValue).catch((e) => {
+			console.error(e);
+		});
+	}, [form.setFieldValue]);
+
 	return (
 		<>
-			<Script
-				src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
-			/>
-
 			<Root hidden={locationSelectionActive}>
 				<Header
 					actions={
@@ -326,7 +344,7 @@ const EditMode: FC<Props> = ({
 								variant='cta'
 								size='sm'
 								onClick={() => form.handleSubmit()}
-								disabled={savePlaceMutation.isLoading}
+								disabled={!form.values.location || deletePlaceMutation.isLoading || savePlaceMutation.isLoading}
 							>
 								{savePlaceMutation.isLoading ? 'Saving...' : 'Save'}
 							</Button>
@@ -337,26 +355,23 @@ const EditMode: FC<Props> = ({
 					<MapContainer>
 						<Link href={`${router.asPath}/location`} shallow>
 							<a>
-								<Map
-									mapRef={setMapRef}
-									mode='view'
-									static
-									markerLocation={form.values.location}
-									removeMapOnMissingLocation
-								/>
+								{form.values.previewURL
+									? <img src={form.values.previewURL} alt='Location preview' />
+									: (
+										<MissingLocationContainer>
+											<Image
+												src={MarkerSvg.src}
+												width={MarkerSvg.width / 2}
+												height={MarkerSvg.height / 2}
+												alt='Marker'
+											/>
+											<div className='text'>
+												{previewLoading ? 'Loading preview...' : 'Tap to select location'}
+											</div>
+										</MissingLocationContainer>
+									)}
 							</a>
 						</Link>
-						{
-							/* {!savePlaceMutation.isLoading && (
-							<Link href={`${router.asPath}/location`} shallow>
-								<a>
-									<EditMapButton size='sm'>
-										Edit
-									</EditMapButton>
-								</a>
-							</Link>
-						)} */
-						}
 					</MapContainer>
 					<div>
 						<Input
@@ -460,11 +475,24 @@ const HeaderButtons = styled('div', {
 	},
 });
 
-const EditMapButton = styled(Button, {
+const MissingLocationContainer = styled('div', {
 	position: 'absolute',
-	left: 6,
-	top: 6,
-	zIndex: 402,
-	width: 68,
-	boxShadow: '0 0 3px 1px #000',
+	left: '50%',
+	top: '50%',
+	transform: 'translate(-50%, -50%)',
+	width: '100%',
+	height: '100%',
+	color: theme.colors.inputLabel,
+	display: 'flex',
+	flexFlow: 'column nowrap',
+	alignItems: 'center',
+	justifyContent: 'center',
+	gap: 10,
+	backgroundColor: theme.colors.bgDarkAlt,
+	textAlign: 'center',
+	padding: '0 10px',
+
+	'.text': {
+		color: theme.colors.text,
+	},
 });

@@ -197,7 +197,7 @@ const Root = styled('div', {
 		justifyContent: 'center',
 		gap: 10,
 		backgroundColor: theme.colors.bgDarkAlt,
-		border: `1px dashed ${theme.colors.text}`,
+		// border: `1px dashed ${theme.colors.text}`,
 		textAlign: 'center',
 		padding: '0 10px',
 
@@ -251,7 +251,7 @@ const Marker = styled('div', {
 	},
 });
 
-async function getPreview(location: PlaceLocation): Promise<Blob> {
+export async function getPreview(location: PlaceLocation): Promise<Blob> {
 	const container = document.createElement('div');
 	const style: Partial<CSSStyleDeclaration> = {
 		width: `${theme.sizes.mapPreviewWidth}`,

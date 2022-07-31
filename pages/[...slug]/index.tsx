@@ -225,4 +225,10 @@ export const MapContainer = styled('div', {
 	borderRadius: theme.sizes.borderRadius,
 	overflow: 'hidden',
 	position: 'relative',
+
+	img: {
+		width: '100%',
+		height: '100%',
+		objectFit: 'cover',
+	},
 });

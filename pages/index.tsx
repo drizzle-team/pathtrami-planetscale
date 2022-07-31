@@ -132,23 +132,41 @@ const Home: NextPage = () => {
 					)}
 
 				<div className='footer'>
-					<Button variant='secondary' noPadding>
-						<Image src={Twitter.src} width={Twitter.width} height={Twitter.height} alt='Twitter' />
-					</Button>
-					<Link href='https://github.com/drizzle-team/pathtrami-planetscale'>
-						<a target='_blank'>
-							<Button variant='secondary' noPadding>
-								<Image src={GitHub.src} width={GitHub.width} height={GitHub.height} alt='GitHub' />
-							</Button>
-						</a>
-					</Link>
-					<Button variant='secondary' style={{ flex: 1 }}>
-						What is Pathtrami?
-					</Button>
+					<a href='https://twitter.com/_alexblokh/status/1553847206108708867' target='_blank' rel='noreferrer'>
+						<Button variant='secondary' noPadding>
+							<Image src={Twitter.src} width={Twitter.width} height={Twitter.height} alt='Twitter' />
+						</Button>
+					</a>
+					<a href='https://github.com/drizzle-team/pathtrami-planetscale' target='_blank' rel='noreferrer'>
+						<Button variant='secondary' noPadding>
+							<Image src={GitHub.src} width={GitHub.width} height={GitHub.height} alt='GitHub' />
+						</Button>
+					</a>
+					<a
+						href='https://alexblokh.hashnode.dev/pathtrami-never-explain-them-how-to-get-there'
+						target='_blank'
+						rel='noreferrer'
+						style={{ flex: 1 }}
+					>
+						<Button variant='secondary' style={{ width: '100%' }}>
+							What is Pathtrami?
+						</Button>
+					</a>
 				</div>
 				<div className='attribution'>
-					Created for <a href='https://planetscale.com/?utm_source=hashnode&utm_medium=hackathon&utm_campaign=announcement_article' target='_blank' rel='noreferrer'>PlanetScale</a> &{' '}
-					<a href='https://hashnode.com/?source=planetscale_hackathon_announcement' target='_blank' rel='noreferrer'>Hashnode</a> July 2022 hackathon
+					Created for{' '}
+					<a
+						href='https://planetscale.com/?utm_source=hashnode&utm_medium=hackathon&utm_campaign=announcement_article'
+						target='_blank'
+						rel='noreferrer'
+					>
+						PlanetScale
+					</a>{' '}
+					&{' '}
+					<a href='https://hashnode.com/?source=planetscale_hackathon_announcement' target='_blank' rel='noreferrer'>
+						Hashnode
+					</a>{' '}
+					July 2022 hackathon
 				</div>
 			</div>
 		</Root>
