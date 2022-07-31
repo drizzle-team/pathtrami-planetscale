@@ -120,8 +120,9 @@ export default LocationSelection;
 const Root = styled('div', {
 	display: 'flex',
 	flexFlow: 'column nowrap',
+	height: '100%',
 	zIndex: 402,
-	padding: `20px ${theme.sizes.screenPadding} 20px`,
+	padding: `${theme.sizes.screenPadding} 0`,
 
 	'.address-container': {
 		position: 'relative',
@@ -153,7 +154,7 @@ const Root = styled('div', {
 	},
 
 	'.map-container': {
-		height: 441,
+		flex: 1,
 		marginTop: 20,
 		position: 'relative',
 
@@ -166,7 +167,6 @@ const Root = styled('div', {
 			width: 48,
 			height: 48,
 			boxShadow: '0 0 5px 1px #000',
-			// border: '2px solid rgba(0,0,0,0.2)',
 		},
 	},
 });
