@@ -30,9 +30,9 @@ const LocationCard: FC<Props> = ({ name, address, previewURL, slug, fullWidth = 
 					</div>
 					<TextWrapper>
 						<div>
-							<b>{name}</b>
+							<b>{name || <i>Beautiful place</i>}</b>
 						</div>
-						<div>{address}</div>
+						<div>{address || <i>Beautiful address</i>}</div>
 					</TextWrapper>
 				</a>
 			</Link>

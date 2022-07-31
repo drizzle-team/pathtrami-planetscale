@@ -342,6 +342,7 @@ const EditMode: FC<Props> = ({
 									mode='view'
 									static
 									markerLocation={form.values.location}
+									removeMapOnMissingLocation
 								/>
 							</a>
 						</Link>

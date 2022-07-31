@@ -131,6 +131,7 @@ const LocationSelection: FC<Props> = ({ onSave, onCancel, ...props }) => {
 					mode='edit'
 					markerLocation={location}
 					setMarkerLocation={setLocation}
+					noLocationText='Please allow your browser to access your location'
 				/>
 				<Button className='current-location-button' onClick={handleCurrentLocation}>
 					<Image src={Navigation.src} width={Navigation.width} height={Navigation.height} alt='Navigation' />

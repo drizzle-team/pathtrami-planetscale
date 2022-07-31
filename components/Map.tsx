@@ -1,7 +1,7 @@
 import L, { DragEndEventHandlerFn } from 'leaflet';
 import leafletImage from 'leaflet-image';
 import Image from 'next/image';
-import { FC, memo, useCallback, useEffect, useState } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useState } from 'react';
 import { MapContainer as MapContainerDefault, Marker as LeafletMarker, TileLayer } from 'react-leaflet';
 
 import { styled } from '@stitches/react';
@@ -9,17 +9,21 @@ import { PlaceLocation } from '~/pages/api/places';
 import MarkerSvg from '~/public/marker_old.svg';
 import { theme } from '~/stitches.config';
 
-interface EditModeProps {
+interface BaseProps {
+	markerLocation?: PlaceLocation | undefined;
+	noLocationText?: ReactNode;
+	removeMapOnMissingLocation?: boolean;
+}
+
+interface EditModeProps extends BaseProps {
 	mode: 'edit';
 	static?: never;
-	markerLocation?: PlaceLocation | undefined;
 	setMarkerLocation: (location: PlaceLocation) => void;
 }
 
-interface ViewModeProps {
+interface ViewModeProps extends BaseProps {
 	mode: 'view';
 	static?: boolean;
-	markerLocation?: PlaceLocation | undefined;
 	setMarkerLocation?: undefined;
 }
 
@@ -118,21 +122,23 @@ const Map: FC<Props> = ({ mapRef, ...props }) => {
 	return (
 		<Root>
 			<MapContainerWrapper noLocation={!props.markerLocation}>
-				<MapContainer
-					ref={setMapRef}
-					center={props.markerLocation ?? [0, 0]}
-					zoom={17}
-					static={props.static ?? false}
-					attributionControl={false}
-				>
-					<TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-					{props.mode === 'view' && (
-						<LeafletMarker
-							position={props.markerLocation ?? [0, 0]}
-							icon={MarkerIcon}
-						/>
-					)}
-				</MapContainer>
+				{(props.markerLocation || !props.removeMapOnMissingLocation) && (
+					<MapContainer
+						ref={setMapRef}
+						center={props.markerLocation ?? [0, 0]}
+						zoom={17}
+						static={props.static ?? false}
+						attributionControl={false}
+					>
+						<TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+						{props.mode === 'view' && (
+							<LeafletMarker
+								position={props.markerLocation ?? [0, 0]}
+								icon={MarkerIcon}
+							/>
+						)}
+					</MapContainer>
+				)}
 				{props.mode === 'edit' && (
 					<Marker>
 						<Image
@@ -147,8 +153,9 @@ const Map: FC<Props> = ({ mapRef, ...props }) => {
 
 			{!props.markerLocation && (
 				<div className='location-missing'>
+					<Image src={MarkerSvg.src} width={MarkerSvg.width / 2} height={MarkerSvg.height / 2} alt='Marker' />
 					<div className='text'>
-						No location selected
+						{props.noLocationText ?? 'Tap to select location'}
 					</div>
 				</div>
 			)}
@@ -191,6 +198,8 @@ const Root = styled('div', {
 		gap: 10,
 		backgroundColor: theme.colors.bgDarkAlt,
 		border: `1px dashed ${theme.colors.text}`,
+		textAlign: 'center',
+		padding: '0 10px',
 
 		'.text': {
 			color: theme.colors.text,
@@ -246,7 +255,7 @@ async function getPreview(location: PlaceLocation): Promise<Blob> {
 	const container = document.createElement('div');
 	const style: Partial<CSSStyleDeclaration> = {
 		width: `${theme.sizes.mapPreviewWidth}`,
-		height: `${theme.sizes.mapHeight}`,
+		height: `${theme.sizes.mapPreviewHeight}`,
 		position: 'fixed',
 		top: '0',
 		left: '0',
