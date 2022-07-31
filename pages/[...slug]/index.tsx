@@ -53,8 +53,7 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 
 	const title = `${place.name} - Pathtrami`;
 	const host = 'https://pathtrami.com';
-	const description =
-		`Sharing a place location has never been easier! Visit ${host} and share your first place in 5 minutes.`;
+	const description = `No more explaining how to get there! Visit ${host} and share a location in 5 minutes 🤌`;
 	const url = `${host}/${place.slug}`;
 
 	return (
