@@ -29,11 +29,12 @@ import LocationSelection from './LocationSelection';
 
 const Map = dynamic(() => import('~/components/Map'), { ssr: false });
 
-interface EditModeProps {
+interface Props {
 	place?: Place;
 	newPlace?: boolean;
 	onSave: (slug: string) => void;
 	onCancel: () => void;
+	pathChunks: string[];
 }
 
 interface ImageDataBase {
@@ -73,11 +74,12 @@ async function uploadImages(uploadUrls: string[], files: Blob[]) {
 	);
 }
 
-const EditMode: FC<EditModeProps> = ({
+const EditMode: FC<Props> = ({
 	place,
 	onSave,
 	onCancel,
-}: EditModeProps) => {
+	pathChunks,
+}: Props) => {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
@@ -85,7 +87,7 @@ const EditMode: FC<EditModeProps> = ({
 	const [fileInputKey, setFileInputKey] = useState(uuid());
 	const [mapRef, setMapRef] = useState<MapRef | null>(null);
 
-	const locationSelectionActive = router.query['slug']?.slice(-1)[0] === 'location';
+	const locationSelectionActive = pathChunks.slice(-1)[0] === 'location';
 
 	const googleLoginMutation = useMutation(async (code: string) => {
 		return apiClient.post<Credentials>('/auth/google', {

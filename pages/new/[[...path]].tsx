@@ -14,7 +14,13 @@ const New: NextPage = () => {
 		router.replace(`/${slug}`);
 	};
 
-	return <EditMode onCancel={handleCancel} onSave={handleSave} />;
+	return (
+		<EditMode
+			onCancel={handleCancel}
+			onSave={handleSave}
+			pathChunks={router.query['path'] as string[] | undefined ?? []}
+		/>
+	);
 };
 
 export default New;

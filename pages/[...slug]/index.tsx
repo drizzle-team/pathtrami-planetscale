@@ -21,7 +21,8 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 
 	const [editable, setEditable] = useState(false);
 
-	const [, ...restPath] = router.query['slug'] as string[] | undefined ?? [];
+	const pathChunks = router.query['slug'] as string[];
+	const [, ...restPath] = pathChunks;
 
 	const setViewMode = () => {
 		router.push(`/${place.slug}`);
@@ -93,6 +94,7 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 						place={place}
 						onSave={handlePlaceUpdated}
 						onCancel={handleEditCancel}
+						pathChunks={pathChunks}
 					/>
 				)
 				: undefined}
