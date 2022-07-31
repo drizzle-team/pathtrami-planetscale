@@ -78,6 +78,7 @@ const Home: NextPage = () => {
 				? (
 					<LocationCards>
 						<LocationCardLoader />
+						<LocationCardLoader />
 					</LocationCards>
 				)
 				: placesQuery.data?.length

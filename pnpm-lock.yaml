@@ -22,7 +22,7 @@ specifiers:
   critters: ^0.0.16
   dprint: ^0.30.2
   drizzle-orm: 0.12.0-beta.0
-  drizzle-orm-mysql: 0.12.0-beta.2
+  drizzle-orm-mysql: 0.12.0-beta.3
   eslint: 8.19.0
   eslint-config-next: 12.2.0
   formik: ^2.2.9
@@ -58,8 +58,8 @@ dependencies:
   '@stitches/react': 1.2.8_react@18.2.0
   axios: 0.27.2
   critters: 0.0.16
-  drizzle-orm: 0.12.0-beta.0_hf23g3cl74itgdy4ofc4mgpck4
-  drizzle-orm-mysql: 0.12.0-beta.2_upb7yhxkw4fjr2bazovuyinizi
+  drizzle-orm: 0.12.0-beta.0_7yyrcx24jkd3d5va6uq4bl2zki
+  drizzle-orm-mysql: 0.12.0-beta.3_upb7yhxkw4fjr2bazovuyinizi
   formik: 2.2.9_react@18.2.0
   framer-motion: 6.5.1_biqbaboplfbrettd7655fr4n2y
   google-auth-library: 8.1.1
@@ -2168,8 +2168,8 @@ packages:
       yauzl: 2.10.0
     dev: true
 
-  /drizzle-orm-mysql/0.12.0-beta.2_upb7yhxkw4fjr2bazovuyinizi:
-    resolution: {integrity: sha512-6UiNPyX5jrReQXhlJCCFxGALuGTctvTvLFKbtGBeLveRCvJk9UY+eGzDylonu+TP7z5uEWF4B538yZL+RYwrlA==}
+  /drizzle-orm-mysql/0.12.0-beta.3_upb7yhxkw4fjr2bazovuyinizi:
+    resolution: {integrity: sha512-BhSTswKW9RRDbJLtEBUW6yf/5CqOAuJ+N16DkzBfW/CGzNrXIDTozUiwLtWYYB0TLKj77QYBV8OkomYxG+0rxQ==}
     peerDependencies:
       drizzle-orm: '>=0.12.0 <0.13.0'
       mysql2: '>=2 <3'
@@ -2179,11 +2179,11 @@ packages:
       mysql2:
         optional: true
     dependencies:
-      drizzle-orm: 0.12.0-beta.0_hf23g3cl74itgdy4ofc4mgpck4
+      drizzle-orm: 0.12.0-beta.0_7yyrcx24jkd3d5va6uq4bl2zki
       mysql2: 2.3.3
     dev: false
 
-  /drizzle-orm/0.12.0-beta.0_hf23g3cl74itgdy4ofc4mgpck4:
+  /drizzle-orm/0.12.0-beta.0_7yyrcx24jkd3d5va6uq4bl2zki:
     resolution: {integrity: sha512-rsRmclZjYTFRlHhpJRkiI5w93ThejXpaP6j6n916vcwAcqYtnr5NvlAb49FDKHCyitMbgyL4ij1QKjrE9GsCiQ==}
     peerDependencies:
       drizzle-orm-mysql: '>=0.12.0-beta.0'
@@ -2203,7 +2203,7 @@ packages:
       sqlite3:
         optional: true
     dependencies:
-      drizzle-orm-mysql: 0.12.0-beta.2_upb7yhxkw4fjr2bazovuyinizi
+      drizzle-orm-mysql: 0.12.0-beta.3_upb7yhxkw4fjr2bazovuyinizi
       mysql2: 2.3.3
       type-fest: 2.18.0
     dev: false
