@@ -133,17 +133,17 @@ const Map: FC<Props> = ({ mapRef, ...props }) => {
 						/>
 					)}
 				</MapContainer>
+				{props.mode === 'edit' && (
+					<Marker>
+						<Image
+							src={MarkerSvg.src}
+							width={MarkerSvg.width / 2}
+							height={MarkerSvg.height / 2}
+							alt='Marker'
+						/>
+					</Marker>
+				)}
 			</MapContainerWrapper>
-			{props.mode === 'edit' && (
-				<Marker>
-					<Image
-						src={MarkerSvg.src}
-						width={MarkerSvg.width / 2}
-						height={MarkerSvg.height / 2}
-						alt='Marker'
-					/>
-				</Marker>
-			)}
 
 			{!props.markerLocation && (
 				<div className='location-missing'>

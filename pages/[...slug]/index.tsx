@@ -105,7 +105,7 @@ export default LocationPage;
 
 export const getServerSideProps: GetServerSideProps = async ({ query, res }) => {
 	const dbPlaceWithImages = await getPlaceWithImagesBySlug(query['slug']![0]!);
-	const place = aggregatePlaces(dbPlaceWithImages);
+	const [place] = aggregatePlaces(dbPlaceWithImages);
 
 	if (!place) {
 		return {
