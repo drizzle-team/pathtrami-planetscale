@@ -1,13 +1,11 @@
-import { eq } from 'drizzle-orm/expressions';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getPlaceCreatorBySlug } from '~/datalayer/places';
 
-import { places } from '~/models/places';
 import { getCurrentUserId } from '~/utils/auth';
-import { getConnection } from '~/utils/db';
 
 export default async function handler(
 	req: NextApiRequest,
-	res: NextApiResponse<boolean | { message: string }>,
+	res: NextApiResponse<boolean | { message: string; }>,
 ) {
 	const userId = await getCurrentUserId(req);
 
@@ -17,18 +15,12 @@ export default async function handler(
 
 	const slug = req.query['slug'] as string;
 
-	const db = await getConnection();
-	const place = await db.places
-		.select({ createdBy: places.createdBy })
-		.where(eq(places.slug, slug))
-		.limit(1)
-		.execute()
-		.then(([place]) => place);
+	const placeCreator = await getPlaceCreatorBySlug(slug);
 
-	if (!place) {
+	if (!placeCreator) {
 		res.status(404).json({ message: 'Place not found' });
 		return;
 	}
 
-	res.status(200).json(place.createdBy === userId);
+	res.status(200).json(placeCreator === userId);
 }

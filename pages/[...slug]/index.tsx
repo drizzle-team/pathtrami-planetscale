@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -7,10 +6,10 @@ import { useQuery } from 'react-query';
 
 import EditMode from '~/components/place/EditMode';
 import ViewMode from '~/components/place/ViewMode';
+import { getPlaceWithImagesBySlug } from '~/datalayer/places';
 import { styled, theme } from '~/stitches.config';
 import { apiClient } from '~/utils/apiClient';
-import { Place } from '../api/places';
-import { getPlace } from '../api/places/[slug]';
+import { aggregatePlaces, Place } from '../api/places';
 
 interface Props {
 	place: Place;
@@ -105,7 +104,8 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 export default LocationPage;
 
 export const getServerSideProps: GetServerSideProps = async ({ query, res }) => {
-	const place = await getPlace(query['slug']![0]!);
+	const dbPlaceWithImages = await getPlaceWithImagesBySlug(query['slug']![0]!);
+	const place = aggregatePlaces(dbPlaceWithImages);
 
 	if (!place) {
 		return {

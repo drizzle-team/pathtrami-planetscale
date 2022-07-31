@@ -1,17 +1,18 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { desc, eq } from 'drizzle-orm/expressions';
 import { InferModel } from 'drizzle-orm-mysql';
-
-import { getConnection } from '~/utils/db';
-import { placesImages } from '~/models/places_images';
-import { places } from '~/models/places';
-import { SavePlaceRequest } from './[slug]';
-import { getCurrentUserId } from '~/utils/auth';
+import { NextApiRequest, NextApiResponse } from 'next';
 import {
-	buildPlacePreviewKey,
-	createUploadUrl,
-	createUploadUrls,
-} from '~/utils/s3';
+	addImagesToPlace,
+	createPlace,
+	DbPlaceImage,
+	getOnePlaceBySlug,
+	getUserPlacesWithImages,
+} from '~/datalayer/places';
+
+import { places } from '~/models/places';
+import { placesImages } from '~/models/places_images';
+import { getCurrentUserId } from '~/utils/auth';
+import { buildPlacePreviewKey, createUploadUrl, createUploadUrls } from '~/utils/s3';
+import { SavePlaceRequest } from './[slug]';
 
 export interface Place {
 	slug: string;
@@ -32,7 +33,7 @@ export interface PlaceLocation {
 	lng: number;
 }
 
-export async function mapPlaceResponse(
+export function mapPlaceResponse(
 	place: Pick<
 		InferModel<typeof places>,
 		| 'slug'
@@ -45,7 +46,7 @@ export async function mapPlaceResponse(
 		| 'previewURL'
 	>,
 	images: Pick<InferModel<typeof placesImages>, 'id' | 'url'>[],
-): Promise<Place> {
+): Place {
 	return {
 		slug: place.slug,
 		name: place.name,
@@ -61,7 +62,7 @@ export async function mapPlaceResponse(
 	};
 }
 
-export async function aggregatePlaces(
+export function aggregatePlaces(
 	rows: {
 		places: Pick<
 			InferModel<typeof places>,
@@ -76,14 +77,14 @@ export async function aggregatePlaces(
 		>;
 		placesImages: Pick<InferModel<typeof placesImages>, 'id' | 'url'>;
 	}[],
-): Promise<Place[]> {
+): Place[] {
 	const result: Place[] = [];
 
 	for (const { places: place, placesImages: image } of rows) {
 		const item = result.find((item) => item.slug === place.slug);
 
 		if (!item) {
-			result.push(await mapPlaceResponse(place, image.id ? [image] : []));
+			result.push(mapPlaceResponse(place, image.id ? [image] : []));
 		} else if (image.id) {
 			item.images.push({
 				id: image.id,
@@ -114,7 +115,7 @@ export default async function handler(
 
 async function handleGet(
 	req: NextApiRequest,
-	res: NextApiResponse<Place[] | { message: string }>,
+	res: NextApiResponse<Place[] | { message: string; }>,
 ) {
 	const userId = await getCurrentUserId(req);
 	if (!userId) {
@@ -122,25 +123,15 @@ async function handleGet(
 		return;
 	}
 
-	const db = await getConnection();
-
-	const items: Place[] = await db.places
-		.select()
-		.leftJoin(placesImages, eq(placesImages.placeSlug, places.slug), {
-			id: placesImages.id,
-			url: placesImages.url,
-		})
-		.where(eq(places.createdBy, userId))
-		.orderBy(desc(places.createdAt), desc(placesImages.createdAt))
-		.execute()
-		.then(aggregatePlaces);
+	const placesToImages = await getUserPlacesWithImages(userId);
+	const items: Place[] = aggregatePlaces(placesToImages);
 
 	res.status(200).json(items);
 }
 
 async function handlePost(
 	req: NextApiRequest,
-	res: NextApiResponse<Place | { message: string }>,
+	res: NextApiResponse<Place | { message: string; }>,
 ) {
 	const userId = await getCurrentUserId(req);
 	if (!userId) {
@@ -148,53 +139,40 @@ async function handlePost(
 		return;
 	}
 
-	const db = await getConnection();
-	const { name, address, description, location, images } =
-		req.body as SavePlaceRequest<'new'>;
+	const { name, address, description, location, images } = req.body as SavePlaceRequest<'new'>;
 
 	const slug = Math.random().toString(36).substring(2);
 
 	const previewImage = await createUploadUrl(buildPlacePreviewKey(slug));
 
-	await db.places
-		.insert({
-			slug,
-			name,
-			address,
-			description,
-			lat: location.lat,
-			lng: location.lng,
-			createdBy: userId,
-			previewURL: previewImage.serveURL,
-		})
-		.execute();
+	await createPlace({
+		slug,
+		name,
+		address,
+		description,
+		lat: location.lat,
+		lng: location.lng,
+		createdBy: userId,
+		previewURL: previewImage.serveURL,
+	});
 
-	const place = await db.places
-		.select()
-		.where(eq(places.slug, slug))
-		.limit(1)
-		.execute()
-		.then(([place]) => place!);
+	const place = await getOnePlaceBySlug(slug);
+
+	if (!place) {
+		res.status(404).json({ message: 'Place not found' });
+		return;
+	}
 
 	place.previewURL = previewImage.uploadURL;
 
-	let imagesToUpload: Pick<InferModel<typeof placesImages>, 'id' | 'url'>[] =
-		[];
+	let imagesToUpload: Pick<DbPlaceImage, 'id' | 'url'>[] = [];
 
 	if (images.length) {
 		// Create upload URLs for each image and return them in the response
 
 		const uploadUrls = await createUploadUrls(images.length, slug);
 
-		await db.placesImages
-			.insert(
-				uploadUrls.map(({ id, serveURL }) => ({
-					id,
-					placeSlug: slug,
-					url: serveURL,
-				})),
-			)
-			.execute();
+		await addImagesToPlace(slug, uploadUrls);
 
 		imagesToUpload = uploadUrls.map(({ id, uploadURL }) => ({
 			id,
@@ -202,7 +180,7 @@ async function handlePost(
 		}));
 	}
 
-	const result = await mapPlaceResponse(place, imagesToUpload);
+	const result = mapPlaceResponse(place, imagesToUpload);
 
 	res.status(201).json(result);
 }

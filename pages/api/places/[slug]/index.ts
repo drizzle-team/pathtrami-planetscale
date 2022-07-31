@@ -1,11 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { and, asc, eq, notInArray } from 'drizzle-orm/expressions';
-import { InferModel } from 'drizzle-orm-mysql';
 
-import { getConnection } from '~/utils/db';
+import { MySqlUpdateSet } from 'drizzle-orm-mysql/queries';
+import isEqual from 'lodash.isequal';
+import {
+	addImagesToPlace,
+	deleteImageByPlaceSlug,
+	deleteImagesByOldIdsBySlug,
+	getImagesByOldIdsBySlug,
+} from '~/datalayer/placeImages';
+import { deletePlaceBySlug, getCoordinatesBySlug, updatePlaceByCreatorAndSlug } from '~/datalayer/places';
 import { places } from '~/models/places';
-import { placesImages } from '~/models/places_images';
-import { aggregatePlaces, PlaceLocation, Place } from '..';
 import { getCurrentUserId } from '~/utils/auth';
 import {
 	buildPlaceImageKey,
@@ -16,8 +20,7 @@ import {
 	deleteObject,
 	deleteObjectsWithPrefix,
 } from '~/utils/s3';
-import isEqual from 'lodash.isequal';
-import { MySqlUpdateSet } from 'drizzle-orm-mysql/queries';
+import { PlaceLocation } from '..';
 
 export default async function handler(
 	req: NextApiRequest,
@@ -32,22 +35,6 @@ export default async function handler(
 			res.status(405).json({ message: 'Method not allowed' });
 			break;
 	}
-}
-
-export async function getPlace(slug: string): Promise<Place | undefined> {
-	const db = await getConnection();
-	const [place] = await db.places
-		.select()
-		.leftJoin(placesImages, eq(places.slug, placesImages.placeSlug), {
-			id: placesImages.id,
-			url: placesImages.url,
-		})
-		.where(eq(places.slug, slug))
-		.orderBy(asc(placesImages.index))
-		.execute()
-		.then(aggregatePlaces);
-
-	return place;
 }
 
 interface ImageDataBase {
@@ -81,7 +68,7 @@ export interface UpdatePlaceResponse {
 
 async function handlePost(
 	req: NextApiRequest,
-	res: NextApiResponse<UpdatePlaceResponse | { message: string }>,
+	res: NextApiResponse<UpdatePlaceResponse | { message: string; }>,
 ) {
 	const userId = await getCurrentUserId(req);
 	if (!userId) {
@@ -89,19 +76,10 @@ async function handlePost(
 		return;
 	}
 
-	const db = await getConnection();
 	const slug = req.query['slug'] as string;
-	const { name, address, description, location, images } =
-		req.body as SavePlaceRequest;
+	const { name, address, description, location, images } = req.body as SavePlaceRequest;
 
-	const [oldLocation] = await db.places
-		.select({
-			lat: places.lat,
-			lng: places.lng,
-		})
-		.where(eq(places.slug, slug))
-		.limit(1)
-		.execute();
+	const oldLocation = await getCoordinatesBySlug(slug);
 
 	if (!oldLocation) {
 		res.status(404).json({ message: 'Place not found' });
@@ -130,11 +108,7 @@ async function handlePost(
 		previewURL = previewImage.uploadURL;
 	}
 
-	const [{ affectedRows }] = await db.places
-		.update()
-		.set(fieldsToUpdate)
-		.where(and(eq(places.createdBy, userId), eq(places.slug, slug)))
-		.execute();
+	const affectedRows = await updatePlaceByCreatorAndSlug(userId, slug, fieldsToUpdate);
 
 	if (affectedRows === 0) {
 		res.status(404).json({ message: 'Place not found' });
@@ -151,19 +125,7 @@ async function handlePost(
 		}
 	});
 
-	const where = and(
-		eq(placesImages.placeSlug, slug),
-		oldImages.length
-			? notInArray(
-					placesImages.id,
-					oldImages.map(({ id }) => id),
-			  )
-			: undefined,
-	);
-	const imagesToRemove = await db.placesImages
-		.select({ id: placesImages.id })
-		.where(where)
-		.execute();
+	const imagesToRemove = await getImagesByOldIdsBySlug(slug, oldImages.map(({ id }) => id));
 
 	await Promise.all(
 		imagesToRemove.map(async ({ id }) => {
@@ -171,19 +133,12 @@ async function handlePost(
 		}),
 	);
 
-	await db.placesImages.delete().where(where).execute();
+	await deleteImagesByOldIdsBySlug(slug, oldImages.map(({ id }) => id));
 
 	const imagesToUpload = await createUploadUrls(newImages.length, slug);
 
-	const imagesToInsert: InferModel<typeof placesImages, 'insert'>[] =
-		imagesToUpload.map((img) => ({
-			id: img.id,
-			placeSlug: slug,
-			url: img.serveURL,
-		}));
-
-	if (imagesToInsert.length) {
-		await db.placesImages.insert(imagesToInsert).execute();
+	if (imagesToUpload.length) {
+		await addImagesToPlace(slug, imagesToUpload);
 	}
 
 	res.status(200).json({
@@ -194,19 +149,13 @@ async function handlePost(
 
 async function handleDelete(
 	req: NextApiRequest,
-	res: NextApiResponse<{ message: string }>,
+	res: NextApiResponse<{ message: string; }>,
 ) {
-	const db = await getConnection();
 	const slug = req.query['slug'] as string;
 
 	await Promise.all([
-		db.placesImages
-			.delete()
-			.where(eq(placesImages.placeSlug, slug))
-			.execute(),
-
-		db.places.delete().where(eq(places.slug, slug)).execute(),
-
+		deleteImageByPlaceSlug(slug),
+		deletePlaceBySlug(slug),
 		deleteObjectsWithPrefix(buildPlacePrefix(slug)),
 	]);
 
