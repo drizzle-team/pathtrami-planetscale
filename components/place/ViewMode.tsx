@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { MapContainer, Root } from '~/pages/[...slug]';
 import { Place } from '~/pages/api/places';
 import Edit from '~/public/edit.svg';
+import Plus from '~/public/plus_black.svg';
 import { styled } from '~/stitches.config';
 import Button from '../Button';
 import Header from '../Header';
@@ -34,18 +35,31 @@ const ViewMode = memo<ViewModeProps>(
 		return (
 			<Root>
 				<Header
-					actions={editable && (
-						<Link href={`${router.asPath}/edit`} shallow>
-							<a>
-								<Button
-									size='sm'
-									icon={<Image src={Edit.src} width={Edit.width} height={Edit.height} alt='Edit' />}
-								>
-									Edit
-								</Button>
-							</a>
-						</Link>
-					)}
+					actions={editable
+						? (
+							<Link href={`${router.asPath}/edit`} shallow>
+								<a>
+									<Button
+										size='sm'
+										icon={<Image src={Edit.src} width={Edit.width} height={Edit.height} alt='Edit' />}
+									>
+										Edit
+									</Button>
+								</a>
+							</Link>
+						)
+						: (
+							<Link href='/new'>
+								<a>
+									<Button
+										size='sm'
+										icon={<Image src={Plus.src} width={Plus.width} height={Plus.height} alt='Plus' />}
+									>
+										Add place
+									</Button>
+								</a>
+							</Link>
+						)}
 				/>
 				<div className='content'>
 					<MapContainer>

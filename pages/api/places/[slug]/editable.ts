@@ -5,12 +5,13 @@ import { getCurrentUserId } from '~/utils/auth';
 
 export default async function handler(
 	req: NextApiRequest,
-	res: NextApiResponse<boolean | { message: string; }>,
+	res: NextApiResponse<boolean | { message: string }>,
 ) {
 	const userId = await getCurrentUserId(req);
 
 	if (!userId) {
 		res.status(200).json(false);
+		return;
 	}
 
 	const slug = req.query['slug'] as string;
