@@ -74,5 +74,5 @@ const Root = styled('button', {
 });
 
 const IconWrapper = styled('span', {
-	marginRight: 10,
+	marginRight: 5,
 });

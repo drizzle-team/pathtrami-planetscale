@@ -9,9 +9,9 @@ import { useMutation, useQuery } from 'react-query';
 
 import Button from '~/components/Button';
 import Header from '~/components/Header';
-import LocationCard, { LocationCardPlaceholder } from '~/components/LocationCard';
+import LocationCard, { LocationCardLoader, LocationCardPlaceholder } from '~/components/LocationCard';
+import Animated from '~/public/example.webp';
 import GitHub from '~/public/github.svg';
-import Animated from '~/public/pinched-fingers.gif';
 import Plus from '~/public/plus_black.svg';
 import Twitter from '~/public/twitter.svg';
 import { styled, theme } from '~/stitches.config';
@@ -77,12 +77,12 @@ const Home: NextPage = () => {
 			{isAuthenticated && placesQuery.status !== 'success'
 				? (
 					<LocationCards>
-						<LocationCardPlaceholder />
+						<LocationCardLoader />
 					</LocationCards>
 				)
 				: placesQuery.data?.length
 				? (
-					<LocationCards singlePlace={placesQuery.data.length === 1}>
+					<LocationCards>
 						{placesQuery.data.map((place) => (
 							<LocationCard
 								key={place.slug}
@@ -93,6 +93,11 @@ const Home: NextPage = () => {
 								fullWidth={placesQuery.data.length === 1}
 							/>
 						))}
+						<Link href='/new'>
+							<a>
+								<LocationCardPlaceholder />
+							</a>
+						</Link>
 					</LocationCards>
 				)
 				: (
@@ -109,21 +114,21 @@ const Home: NextPage = () => {
 
 			<div className='bottom'>
 				{isAuthenticated
-					? (
-						<Button variant='secondary' onClick={handleLogout}>
-							Log out
-						</Button>
+					? !!process.env.NEXT_PUBLIC_SHOW_LOGOUT_BUTTON && (
+						<>
+							<Button variant='secondary' onClick={handleLogout}>
+								Log out
+							</Button>
+							<hr />
+						</>
 					)
 					: (
 						<>
 							<div style={{ alignSelf: 'center' }}>Already have places?</div>
 							<Button variant='secondary' onClick={login}>Continue with Google</Button>
+							<hr />
 						</>
 					)}
-
-				<hr
-					style={{ width: '100%', height: 1, border: 0, backgroundColor: theme.colors.bgButtonSecondary.toString() }}
-				/>
 
 				<div className='footer'>
 					<Button variant='secondary' noPadding>
@@ -204,6 +209,13 @@ const Root = styled('div', {
 		color: theme.colors.inputLabel,
 		fontSize: theme.fontSizes.sm,
 
+		hr: {
+			width: '100%',
+			height: 1,
+			border: 0,
+			backgroundColor: theme.colors.bgButtonSecondary.toString(),
+		},
+
 		'.footer': {
 			display: 'flex',
 			flexFlow: 'row nowrap',
@@ -241,12 +253,4 @@ const LocationCards = styled('div', {
 	flexFlow: 'row nowrap',
 	gap: 15,
 	overflowY: 'auto',
-
-	variants: {
-		singlePlace: {
-			true: {
-				justifyContent: 'center',
-			},
-		},
-	},
 });

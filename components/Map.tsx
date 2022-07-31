@@ -6,7 +6,7 @@ import { MapContainer as MapContainerDefault, Marker as LeafletMarker, TileLayer
 
 import { styled } from '@stitches/react';
 import { PlaceLocation } from '~/pages/api/places';
-import MarkerSvg from '~/public/marker.svg';
+import MarkerSvg from '~/public/marker_old.svg';
 import { theme } from '~/stitches.config';
 
 interface EditModeProps {

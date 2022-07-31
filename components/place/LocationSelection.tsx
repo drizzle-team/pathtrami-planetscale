@@ -5,7 +5,7 @@ import { MapRef } from '~/components/Map';
 
 import Image from 'next/image';
 import { PlaceLocation } from '~/pages/api/places';
-import Navigation from '~/public/navigation.svg';
+import Navigation from '~/public/crosshair.svg';
 import { styled, theme } from '~/stitches.config';
 import Button from '../Button';
 import Input from '../Input';
@@ -194,10 +194,11 @@ const Root = styled('div', {
 			right: 20,
 			bottom: 20,
 			zIndex: 1001,
-			borderRadius: '50%',
+			// borderRadius: '50%',
 			width: 48,
 			height: 48,
-			boxShadow: '0 0 5px 1px #000',
+			padding: 0,
+			boxShadow: '0 0 5px 1px rgba(0, 0, 0, 0.20)',
 		},
 	},
 });

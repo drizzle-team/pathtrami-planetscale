@@ -1,10 +1,12 @@
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import Link from 'next/link';
 import { FC } from 'react';
 import { RectShape, TextBlock } from 'react-placeholder/lib/placeholders';
 
 import 'react-placeholder/lib/reactPlaceholder.css';
 
+import Plus from '~/public/plus_white.svg';
 import { styled, theme } from '~/stitches.config';
 
 const Map = dynamic(() => import('~/components/Map'), { ssr: false });
@@ -19,7 +21,7 @@ interface Props {
 
 const LocationCard: FC<Props> = ({ name, address, previewURL, slug, fullWidth = false }) => {
 	return (
-		<Root fullWidth={fullWidth}>
+		<Root>
 			<Link href={`/${slug}`}>
 				<a>
 					<div className='preview'>
@@ -40,10 +42,9 @@ const LocationCard: FC<Props> = ({ name, address, previewURL, slug, fullWidth = 
 
 export default LocationCard;
 
-export const LocationCardPlaceholder: FC = () => (
+export const LocationCardLoader: FC = () => (
 	<Root>
 		<div className='preview'>
-			{/* eslint-disable-next-line @next/next/no-img-element */}
 			<RectShape className='image' color={theme.colors.bgDarkAlt.toString()} />
 		</div>
 		<TextWrapper>
@@ -52,24 +53,34 @@ export const LocationCardPlaceholder: FC = () => (
 	</Root>
 );
 
+export const LocationCardPlaceholder: FC = () => {
+	return (
+		<Root className='placeholder'>
+			<Image src={Plus.src} width={Plus.width} height={Plus.height} alt='Plus' />
+			Add place
+		</Root>
+	);
+};
+
 const Root = styled('div', {
+	flex: '0 0 auto',
 	borderRadius: 8,
 	border: '2px solid #A9D1FF',
 	padding: '4px 4px 34px 4px',
 	userSelect: 'none',
+	width: 294,
+	height: 383,
 
-	variants: {
-		fullWidth: {
-			true: {
-				'a, .preview': {
-					width: '100%',
-				},
-			},
-		},
+	'&.placeholder': {
+		backgroundColor: theme.colors.bgDarkAlt,
+		border: '1px dashed #FFF',
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 
 	'.preview': {
-		width: theme.sizes.cardMapWidth,
 		height: theme.sizes.mapHeight,
 		borderRadius: `${theme.sizes.borderRadius}px ${theme.sizes.borderRadius}px 0 0`,
 		overflow: 'hidden',
