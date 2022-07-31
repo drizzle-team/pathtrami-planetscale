@@ -159,7 +159,7 @@ const MarkerIcon = new L.Icon({
 export const MarkerIconStatic = new L.Icon({
 	iconUrl: MarkerSvg.src,
 	iconSize: [MarkerSvg.width / 2, MarkerSvg.height / 2],
-	iconAnchor: [7, 28],
+	iconAnchor: [19, 30],
 });
 
 const Root = styled('div', {
