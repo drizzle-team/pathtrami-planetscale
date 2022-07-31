@@ -120,10 +120,6 @@ async function handlePost(
 
 	let previewURL: string | null = null;
 
-	console.log('old location:', oldLocation);
-	console.log('new location:', location);
-	console.log('equal:', isEqual(oldLocation, location));
-
 	if (!isEqual(oldLocation, location)) {
 		const previewImage = await createUploadUrl(buildPlacePreviewKey(slug));
 		fieldsToUpdate.previewURL = previewImage.serveURL;

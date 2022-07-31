@@ -1,9 +1,8 @@
-import { faGithub, faTwitter } from '@fortawesome/free-brands-svg-icons';
-import { faMapLocationDot, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useGoogleLogin } from '@react-oauth/google';
+import { keyframes } from '@stitches/react';
 import { Credentials } from 'google-auth-library';
 import type { NextPage } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import NProgress from 'nprogress';
 import { useMutation, useQuery } from 'react-query';
@@ -11,6 +10,10 @@ import { useMutation, useQuery } from 'react-query';
 import Button from '~/components/Button';
 import Header from '~/components/Header';
 import LocationCard, { LocationCardPlaceholder } from '~/components/LocationCard';
+import GitHub from '~/public/github.svg';
+import Animated from '~/public/pinched-fingers.gif';
+import Plus from '~/public/plus_black.svg';
+import Twitter from '~/public/twitter.svg';
 import { styled, theme } from '~/stitches.config';
 import useAuthenticated, { apiClient, logout, setGoogleAuth } from '~/utils/apiClient';
 import { Place } from './api/places';
@@ -62,7 +65,7 @@ const Home: NextPage = () => {
 						<a>
 							<Button
 								size='sm'
-								icon={<FontAwesomeIcon icon={faPlus} />}
+								icon={<Image src={Plus.src} width={Plus.width} height={Plus.height} alt='Plus' />}
 							>
 								Add place
 							</Button>
@@ -95,10 +98,11 @@ const Home: NextPage = () => {
 				: (
 					<>
 						<div className='places-list-placeholder'>
-							<FontAwesomeIcon icon={faMapLocationDot} size='10x' color={theme.colors.bgDarkAlt.toString()} />
-							<div style={{ marginTop: '1rem', color: theme.colors.inputLabel.toString() }}>
-								Start by clicking the &quot;Add place&quot; button!
-							</div>
+							Create your first place ☝️
+						</div>
+						<div className='hand'>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							{/* <img src={Animated.src} alt='Pathtrami' /> */}
 						</div>
 					</>
 				)}
@@ -112,25 +116,33 @@ const Home: NextPage = () => {
 					)
 					: (
 						<>
-							<div style={{ alignSelf: 'center', marginBottom: 10 }}>Already have places?</div>
-							<Button variant='secondary' onClick={login}>Log in with Google</Button>
+							<div style={{ alignSelf: 'center' }}>Already have places?</div>
+							<Button variant='secondary' onClick={login}>Continue with Google</Button>
 						</>
 					)}
 
+				<hr
+					style={{ width: '100%', height: 1, border: 0, backgroundColor: theme.colors.bgButtonSecondary.toString() }}
+				/>
+
 				<div className='footer'>
-					<Button variant='primary' size='sm'>
-						<FontAwesomeIcon icon={faTwitter} size='2x' />
+					<Button variant='secondary' noPadding>
+						<Image src={Twitter.src} width={Twitter.width} height={Twitter.height} alt='Twitter' />
 					</Button>
 					<Link href='https://github.com/drizzle-team/pathtrami-planetscale'>
 						<a target='_blank'>
-							<Button variant='primary' size='sm'>
-								<FontAwesomeIcon icon={faGithub} size='2x' />
+							<Button variant='secondary' noPadding>
+								<Image src={GitHub.src} width={GitHub.width} height={GitHub.height} alt='GitHub' />
 							</Button>
 						</a>
 					</Link>
-					<Button variant='primary' size='sm' style={{ flex: 1 }}>
+					<Button variant='secondary' style={{ flex: 1 }}>
 						What is Pathtrami?
 					</Button>
+				</div>
+				<div className='attribution'>
+					Created for <a href='https://planetscale.com/' target='_blank' rel='noreferrer'>PlanetScale</a> &{' '}
+					<a href='https://hashnode.com/' target='_blank' rel='noreferrer'>Hashnode</a> July 2022 hackathon
 				</div>
 			</div>
 		</Root>
@@ -139,19 +151,48 @@ const Home: NextPage = () => {
 
 export default Home;
 
+const handAnimation = keyframes({
+	'0%': {
+		transform: 'translate(-50%, -50%) rotate(15deg)',
+	},
+	'50%': {
+		transform: 'translate(-50%, calc(-50% - 50px)) rotate(-45deg)',
+	},
+	'100%': {
+		transform: 'translate(-50%, -50%) rotate(15deg)',
+	},
+});
+
 const Root = styled('div', {
 	height: '100%',
 	display: 'flex',
 	flexFlow: 'column nowrap',
+	position: 'relative',
 
 	'.places-list-placeholder': {
-		flex: 1,
-		// marginBottom: 140,
-		alignSelf: 'center',
+		marginRight: 40,
+		alignSelf: 'flex-end',
 		display: 'flex',
 		flexFlow: 'column nowrap',
 		alignItems: 'center',
 		justifyContent: 'center',
+		color: theme.colors.inputLabel,
+	},
+
+	'.hand': {
+		position: 'absolute',
+		left: '50%',
+		top: '50%',
+		// width: 300,
+		// height: 300,
+		transform: 'translate(-50%, -50%)',
+		transformOrigin: '50px 200px',
+		// animation: `${handAnimation} 1s infinite`,
+
+		img: {
+			width: '100%',
+			height: '100%',
+		},
 	},
 
 	'.bottom': {
@@ -159,17 +200,37 @@ const Root = styled('div', {
 		paddingBottom: theme.sizes.screenPadding,
 		display: 'flex',
 		flexFlow: 'column nowrap',
+		gap: 5,
+		color: theme.colors.inputLabel,
+		fontSize: theme.fontSizes.sm,
 
 		'.footer': {
-			marginTop: 20,
 			display: 'flex',
 			flexFlow: 'row nowrap',
 			alignItems: 'center',
 			gap: 10,
 
+			button: {
+				width: 48,
+			},
+
 			a: {
 				display: 'flex',
 				alignItems: 'center',
+			},
+		},
+
+		'.attribution': {
+			alignSelf: 'center',
+			fontSize: theme.fontSizes.sm,
+			textAlign: 'center',
+
+			'&, a': {
+				color: theme.colors.inputLabel,
+			},
+
+			a: {
+				textDecoration: 'underline',
 			},
 		},
 	},

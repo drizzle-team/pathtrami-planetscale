@@ -1,5 +1,3 @@
-import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios, { AxiosResponse } from 'axios';
 import { useFormik } from 'formik';
@@ -16,10 +14,13 @@ import { v4 as uuid } from 'uuid';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { Credentials } from 'google-auth-library';
+import Script from 'next/script';
 import { MapRef } from '~/components/Map';
 import { MapContainer, Root } from '~/pages/[...slug]';
 import { Place, PlaceLocation } from '~/pages/api/places';
 import { SavePlaceRequest, UpdatePlaceResponse } from '~/pages/api/places/[slug]';
+import Plus from '~/public/plus_white.svg';
+import X from '~/public/x.svg';
 import { styled } from '~/stitches.config';
 import { apiClient, isAuthenticated, setGoogleAuth } from '~/utils/apiClient';
 import Button from '../Button';
@@ -54,7 +55,7 @@ interface OldImageData extends ImageDataBase {
 type ImageData = NewImageData | OldImageData;
 
 interface PlaceFormData {
-	location: PlaceLocation;
+	location?: PlaceLocation | undefined;
 	name: string;
 	address: string;
 	description: string;
@@ -129,11 +130,14 @@ const EditMode: FC<Props> = ({
 				(image): image is NewImageData => !!image.new,
 			);
 
+			const location = formData.location ?? { lat: 0, lng: 0 };
+
 			if (!place) {
 				// Create new place
 
 				const requestData: SavePlaceRequest<'new'> = {
 					...formData,
+					location,
 					images: formData.images.map((image) => ({
 						id: image.id,
 						new: true,
@@ -146,7 +150,7 @@ const EditMode: FC<Props> = ({
 					.then(({ data }) => data);
 				slug = place.slug;
 
-				const preview = await mapRef!.getPreview(formData.location);
+				const preview = await mapRef!.getPreview(location);
 
 				await uploadImages(
 					[...place.images.map(({ url }) => url), place.previewURL],
@@ -159,6 +163,7 @@ const EditMode: FC<Props> = ({
 
 				const requestData: SavePlaceRequest = {
 					...formData,
+					location,
 					images: formData.images.map((image) =>
 						image.new
 							? {
@@ -183,7 +188,7 @@ const EditMode: FC<Props> = ({
 				const blobs: UploadImageFileConfig[] = newImages.map(({ file }) => file);
 
 				if (response.previewURL) {
-					const preview = await mapRef!.getPreview(formData.location);
+					const preview = await mapRef!.getPreview(location);
 
 					images.push(response.previewURL);
 					blobs.push({
@@ -233,7 +238,7 @@ const EditMode: FC<Props> = ({
 
 	const form = useFormik<PlaceFormData>({
 		initialValues: {
-			location: place?.location ?? { lat: 0, lng: 0 },
+			location: place?.location,
 			name: place?.name ?? '',
 			address: place?.address ?? '',
 			description: place?.description ?? '',
@@ -301,6 +306,10 @@ const EditMode: FC<Props> = ({
 
 	return (
 		<>
+			<Script
+				src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
+			/>
+
 			<Root hidden={locationSelectionActive}>
 				<Header
 					actions={
@@ -326,13 +335,18 @@ const EditMode: FC<Props> = ({
 				/>
 				<div className='content'>
 					<MapContainer>
-						<Map
-							mapRef={setMapRef}
-							mode='view'
-							static
-							markerLocation={form.values.location}
-						/>
-						{!savePlaceMutation.isLoading && (
+						<Link href={`${router.asPath}/location`} shallow>
+							<a>
+								<Map
+									mapRef={setMapRef}
+									mode='view'
+									static
+									markerLocation={form.values.location}
+								/>
+							</a>
+						</Link>
+						{
+							/* {!savePlaceMutation.isLoading && (
 							<Link href={`${router.asPath}/location`} shallow>
 								<a>
 									<EditMapButton size='sm'>
@@ -340,7 +354,8 @@ const EditMode: FC<Props> = ({
 									</EditMapButton>
 								</a>
 							</Link>
-						)}
+						)} */
+						}
 					</MapContainer>
 					<div>
 						<Input
@@ -382,14 +397,14 @@ const EditMode: FC<Props> = ({
 								<Image src={image.url} alt={`Instructions ${index + 1}`} layout='fill' />
 								{!savePlaceMutation.isLoading && (
 									<button className='remove' onClick={() => handleImageDelete(image.id)}>
-										<FontAwesomeIcon icon={faTimes} size='lg' />
+										<Image src={X.src} width={X.width} height={X.height} alt='Remove' />
 									</button>
 								)}
 							</div>
 						))}
 						{form.values.images.length < 4 && (
 							<div className='image new'>
-								<FontAwesomeIcon icon={faPlus} />
+								<Image src={Plus.src} width={Plus.width} height={Plus.height} alt='Add image' />
 								Add image
 								<input key={fileInputKey} type='file' accept='image/png, image/jpeg' onChange={handleImageSelect} />
 							</div>

@@ -1,7 +1,7 @@
 import L, { DragEndEventHandlerFn } from 'leaflet';
 import leafletImage from 'leaflet-image';
 import Image from 'next/image';
-import { FC, memo, useEffect, useState } from 'react';
+import { FC, memo, useCallback, useEffect, useState } from 'react';
 import { MapContainer as MapContainerDefault, Marker as LeafletMarker, TileLayer } from 'react-leaflet';
 
 import { styled } from '@stitches/react';
@@ -19,7 +19,7 @@ interface EditModeProps {
 interface ViewModeProps {
 	mode: 'view';
 	static?: boolean;
-	markerLocation: PlaceLocation;
+	markerLocation?: PlaceLocation | undefined;
 	setMarkerLocation?: undefined;
 }
 
@@ -32,16 +32,16 @@ type Props = (EditModeProps | ViewModeProps) & {
 	mapRef?: (ref: MapRef | null) => void;
 };
 
-const Map = memo<Props>(({ mapRef, ...props }) => {
+const Map: FC<Props> = ({ mapRef, ...props }) => {
 	const [map, setMapRaw] = useState<L.Map | null>();
-	const setMapRef = (map: L.Map | null) => {
+	const setMapRef = useCallback((map: L.Map | null) => {
 		setMapRaw(map);
 		if (!map) {
 			mapRef?.(null);
 		} else {
 			mapRef?.({ map, getPreview });
 		}
-	};
+	}, [mapRef]);
 
 	const { setMarkerLocation } = props;
 
@@ -61,11 +61,11 @@ const Map = memo<Props>(({ mapRef, ...props }) => {
 		};
 	}, [map, setMarkerLocation]);
 
-	useEffect(() => {
-		if (map) {
-			setMarkerLocation?.(map.getCenter());
-		}
-	}, [map, setMarkerLocation]);
+	// useEffect(() => {
+	// 	if (map) {
+	// 		setMarkerLocation?.(map.getCenter());
+	// 	}
+	// }, [map, setMarkerLocation]);
 
 	useEffect(() => {
 		if (props.markerLocation) {
@@ -117,21 +117,23 @@ const Map = memo<Props>(({ mapRef, ...props }) => {
 
 	return (
 		<Root>
-			<MapContainer
-				ref={setMapRef}
-				center={props.markerLocation}
-				zoom={17}
-				static={props.static ?? false}
-				attributionControl={false}
-			>
-				<TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
-				{props.mode === 'view' && (
-					<LeafletMarker
-						position={props.markerLocation}
-						icon={MarkerIcon}
-					/>
-				)}
-			</MapContainer>
+			<MapContainerWrapper noLocation={!props.markerLocation}>
+				<MapContainer
+					ref={setMapRef}
+					center={props.markerLocation ?? [0, 0]}
+					zoom={17}
+					static={props.static ?? false}
+					attributionControl={false}
+				>
+					<TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
+					{props.mode === 'view' && (
+						<LeafletMarker
+							position={props.markerLocation ?? [0, 0]}
+							icon={MarkerIcon}
+						/>
+					)}
+				</MapContainer>
+			</MapContainerWrapper>
 			{props.mode === 'edit' && (
 				<Marker>
 					<Image
@@ -142,9 +144,17 @@ const Map = memo<Props>(({ mapRef, ...props }) => {
 					/>
 				</Marker>
 			)}
+
+			{!props.markerLocation && (
+				<div className='location-missing'>
+					<div className='text'>
+						No location selected
+					</div>
+				</div>
+			)}
 		</Root>
 	);
-});
+};
 
 Map.displayName = 'Map';
 
@@ -165,6 +175,27 @@ export const MarkerIconStatic = new L.Icon({
 const Root = styled('div', {
 	position: 'relative',
 	height: '100%',
+
+	'.location-missing': {
+		position: 'absolute',
+		left: '50%',
+		top: '50%',
+		transform: 'translate(-50%, -50%)',
+		width: '100%',
+		height: '100%',
+		color: theme.colors.inputLabel,
+		display: 'flex',
+		flexFlow: 'column nowrap',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 10,
+		backgroundColor: theme.colors.bgDarkAlt,
+		border: `1px dashed ${theme.colors.text}`,
+
+		'.text': {
+			color: theme.colors.text,
+		},
+	},
 });
 
 const MapContainer = styled(MapContainerDefault, {
@@ -175,6 +206,20 @@ const MapContainer = styled(MapContainerDefault, {
 	variants: {
 		static: {
 			true: {
+				pointerEvents: 'none',
+			},
+		},
+	},
+});
+
+const MapContainerWrapper = styled('div', {
+	width: '100%',
+	height: '100%',
+
+	variants: {
+		noLocation: {
+			true: {
+				visibility: 'hidden',
 				pointerEvents: 'none',
 			},
 		},

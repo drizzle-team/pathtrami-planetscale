@@ -4,14 +4,12 @@ specifiers:
   '@aws-sdk/client-s3': ^3.137.0
   '@aws-sdk/s3-request-presigner': ^3.137.0
   '@babel/core': ^7.18.9
-  '@fortawesome/fontawesome-svg-core': ^6.1.2
-  '@fortawesome/free-brands-svg-icons': ^6.1.2
-  '@fortawesome/free-solid-svg-icons': ^6.1.2
-  '@fortawesome/react-fontawesome': ^0.2.0
   '@react-oauth/google': ^0.2.6
   '@stitches/react': ^1.2.8
   '@types/google.accounts': ^0.0.2
+  '@types/google.maps': ^3.49.2
   '@types/leaflet': ^1.7.11
+  '@types/lodash.debounce': ^4.0.7
   '@types/lodash.isequal': ^4.5.6
   '@types/lodash.once': ^4.1.7
   '@types/node': 18.0.0
@@ -32,6 +30,7 @@ specifiers:
   immer: ^9.0.15
   leaflet: ^1.8.0
   leaflet-image: ^0.4.0
+  lodash.debounce: ^4.0.8
   lodash.isequal: ^4.5.0
   lodash.once: ^4.1.1
   mysql2: ^2.3.3
@@ -54,10 +53,6 @@ specifiers:
 dependencies:
   '@aws-sdk/client-s3': 3.137.0
   '@aws-sdk/s3-request-presigner': 3.137.0
-  '@fortawesome/fontawesome-svg-core': 6.1.2
-  '@fortawesome/free-brands-svg-icons': 6.1.2
-  '@fortawesome/free-solid-svg-icons': 6.1.2
-  '@fortawesome/react-fontawesome': 0.2.0_tebjjym7ugcdduvdrfbg7ugwxq
   '@react-oauth/google': 0.2.6_biqbaboplfbrettd7655fr4n2y
   '@stitches/react': 1.2.8_react@18.2.0
   axios: 0.27.2
@@ -69,6 +64,7 @@ dependencies:
   immer: 9.0.15
   leaflet: 1.8.0
   leaflet-image: 0.4.0
+  lodash.debounce: 4.0.8
   lodash.isequal: 4.5.0
   lodash.once: 4.1.1
   mysql2: 2.3.3
@@ -90,7 +86,9 @@ dependencies:
 devDependencies:
   '@babel/core': 7.18.9
   '@types/google.accounts': 0.0.2
+  '@types/google.maps': 3.49.2
   '@types/leaflet': 1.7.11
+  '@types/lodash.debounce': 4.0.7
   '@types/lodash.isequal': 4.5.6
   '@types/lodash.once': 4.1.7
   '@types/node': 18.0.0
@@ -1240,47 +1238,6 @@ packages:
       - supports-color
     dev: true
 
-  /@fortawesome/fontawesome-common-types/6.1.2:
-    resolution: {integrity: sha512-wBaAPGz1Awxg05e0PBRkDRuTsy4B3dpBm+zreTTyd9TH4uUM27cAL4xWyWR0rLJCrRwzVsQ4hF3FvM6rqydKPA==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dev: false
-
-  /@fortawesome/fontawesome-svg-core/6.1.2:
-    resolution: {integrity: sha512-853G/Htp0BOdXnPoeCPTjFrVwyrJHpe8MhjB/DYE9XjwhnNDfuBCd3aKc2YUYbEfHEcBws4UAA0kA9dymZKGjA==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.1.2
-    dev: false
-
-  /@fortawesome/free-brands-svg-icons/6.1.2:
-    resolution: {integrity: sha512-b2eMfXQBsSxh52pcPtYchURQs6BWNh3zVTG8XH8Lv6V4kDhEg7D0kHN+K1SZniDiPb/e5tBlaygsinMUvetITA==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.1.2
-    dev: false
-
-  /@fortawesome/free-solid-svg-icons/6.1.2:
-    resolution: {integrity: sha512-lTgZz+cMpzjkHmCwOG3E1ilUZrnINYdqMmrkv30EC3XbRsGlbIOL8H9LaNp5SV4g0pNJDfQ4EdTWWaMvdwyLiQ==}
-    engines: {node: '>=6'}
-    requiresBuild: true
-    dependencies:
-      '@fortawesome/fontawesome-common-types': 6.1.2
-    dev: false
-
-  /@fortawesome/react-fontawesome/0.2.0_tebjjym7ugcdduvdrfbg7ugwxq:
-    resolution: {integrity: sha512-uHg75Rb/XORTtVt7OS9WoK8uM276Ufi7gCzshVWkUJbHhh3svsUUeqXerrM96Wm7fRiDzfKRwSoahhMIkGAYHw==}
-    peerDependencies:
-      '@fortawesome/fontawesome-svg-core': ~1 || ~6
-      react: '>=16.3'
-    dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.1.2
-      prop-types: 15.8.1
-      react: 18.2.0
-    dev: false
-
   /@humanwhocodes/config-array/0.9.5:
     resolution: {integrity: sha512-ObyMyWxZiCu/yTisA7uzx81s40xR2fD5Cg/2Kq7G02ajkNubJf6BopgDTmDyc3U7sXpNKM8cYOw7s7Tyr+DnCw==}
     engines: {node: '>=10.10.0'}
@@ -1571,6 +1528,10 @@ packages:
     resolution: {integrity: sha512-wmnbDIiGZNr3dJ+NCGiWme78rhsf5gn1YJM6uRjf3FCb8lrRptybQeAnHQ+GDfKSo+z2hRxhS32VRDXJEAvCmg==}
     dev: true
 
+  /@types/google.maps/3.49.2:
+    resolution: {integrity: sha512-ZO1qWciukqED9qcUNW7OaPXWnTlT+tO3WcYkmudZyQW2BqD7TlMFRrdqSCoqfwKhERCwBA5A/YZt/g5A3BqgLQ==}
+    dev: true
+
   /@types/json5/0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
     dev: true
@@ -1579,6 +1540,12 @@ packages:
     resolution: {integrity: sha512-VwAYom2pfIAf/pLj1VR5aLltd4tOtHyvfaJlNYCoejzP2nu52PrMi1ehsLRMUS+bgafmIIKBV1cMfKeS+uJ0Vg==}
     dependencies:
       '@types/geojson': 7946.0.10
+    dev: true
+
+  /@types/lodash.debounce/4.0.7:
+    resolution: {integrity: sha512-X1T4wMZ+gT000M2/91SYj0d/7JfeNZ9PeeOldSNoE/lunLeQXKvkmIumI29IaKMotU/ln/McOIvgzZcQ/3TrSA==}
+    dependencies:
+      '@types/lodash': 4.14.182
     dev: true
 
   /@types/lodash.isequal/4.5.6:
@@ -3206,6 +3173,10 @@ packages:
 
   /lodash-es/4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+    dev: false
+
+  /lodash.debounce/4.0.8:
+    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
     dev: false
 
   /lodash.isequal/4.5.0:

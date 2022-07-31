@@ -1,5 +1,3 @@
-import { faPenToSquare } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { memo, useEffect, useMemo, useState } from 'react';
@@ -8,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { MapContainer, Root } from '~/pages/[...slug]';
 import { Place } from '~/pages/api/places';
+import Edit from '~/public/edit.svg';
 import { styled } from '~/stitches.config';
 import Button from '../Button';
 import Header from '../Header';
@@ -40,7 +39,7 @@ const ViewMode = memo<ViewModeProps>(
 							<a>
 								<Button
 									size='sm'
-									icon={<FontAwesomeIcon icon={faPenToSquare} />}
+									icon={<Image src={Edit.src} width={Edit.width} height={Edit.height} alt='Edit' />}
 								>
 									Edit
 								</Button>
