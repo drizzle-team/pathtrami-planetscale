@@ -2,6 +2,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { keyframes } from '@stitches/react';
 import { Credentials } from 'google-auth-library';
 import type { NextPage } from 'next';
+import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import NProgress from 'nprogress';
@@ -10,7 +11,6 @@ import { useMutation, useQuery } from 'react-query';
 import Button from '~/components/Button';
 import Header from '~/components/Header';
 import LocationCard, { LocationCardLoader, LocationCardPlaceholder } from '~/components/LocationCard';
-import Animated from '~/public/example.webp';
 import GitHub from '~/public/github.svg';
 import Plus from '~/public/plus_black.svg';
 import Twitter from '~/public/twitter.svg';
@@ -59,6 +59,10 @@ const Home: NextPage = () => {
 
 	return (
 		<Root>
+			<Head>
+				<title>My places - Pathtrami</title>
+			</Head>
+
 			<Header
 				actions={
 					<Link href='/new'>
