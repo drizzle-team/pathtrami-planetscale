@@ -81,8 +81,9 @@ const Root = styled('div', {
 	},
 
 	'.preview': {
+		width: '100%',
 		height: theme.sizes.mapHeight,
-		borderRadius: `${theme.sizes.borderRadius}px ${theme.sizes.borderRadius}px 0 0`,
+		borderRadius: `${theme.sizes.borderRadius} ${theme.sizes.borderRadius} 0 0`,
 		overflow: 'hidden',
 
 		'.image': {

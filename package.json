@@ -18,7 +18,7 @@
 		"axios": "^0.27.2",
 		"critters": "^0.0.16",
 		"drizzle-orm": "0.12.0-beta.0",
-		"drizzle-orm-mysql": "0.12.0-beta.2",
+		"drizzle-orm-mysql": "0.12.0-beta.3",
 		"formik": "^2.2.9",
 		"framer-motion": "^6.3.16",
 		"google-auth-library": "^8.1.1",
