@@ -4,9 +4,6 @@ const nextConfig = {
 	images: {
 		domains: ['pathtrami.s3.amazonaws.com'],
 	},
-	experimental: {
-		optimizeCss: true,
-	},
 };
 
 module.exports = nextConfig;

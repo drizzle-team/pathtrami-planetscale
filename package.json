@@ -16,7 +16,6 @@
 		"@react-oauth/google": "^0.2.6",
 		"@stitches/react": "^1.2.8",
 		"axios": "^0.27.2",
-		"critters": "^0.0.16",
 		"drizzle-orm": "0.12.0-beta.0",
 		"drizzle-orm-mysql": "0.12.0-beta.3",
 		"formik": "^2.2.9",
