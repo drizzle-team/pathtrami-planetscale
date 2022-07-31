@@ -9,6 +9,7 @@ import ViewMode from '~/components/place/ViewMode';
 import { getPlaceWithImagesBySlug } from '~/datalayer/places';
 import { styled, theme } from '~/stitches.config';
 import { apiClient } from '~/utils/apiClient';
+import { HOST } from '../_app';
 import { aggregatePlaces, Place } from '../api/places';
 
 interface Props {
@@ -52,9 +53,8 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 	};
 
 	const title = `${place.name} - Pathtrami`;
-	const host = 'https://pathtrami.com';
-	const description = `No more explaining how to get there! Visit ${host} and share a location in 5 minutes 🤌`;
-	const url = `${host}/${place.slug}`;
+	const description = `No more explaining how to get there! Visit ${HOST} and share a location in 5 minutes 🤌`;
+	const url = `${HOST}/${place.slug}`;
 
 	return (
 		<>

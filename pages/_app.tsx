@@ -54,6 +54,8 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
 
 export default MyApp;
 
+export const HOST = 'https://pathtrami.com';
+
 const globalStyles = globalCss({
 	'*': {
 		boxSizing: 'border-box',

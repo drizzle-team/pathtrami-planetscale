@@ -16,6 +16,7 @@ import Plus from '~/public/plus_black.svg';
 import Twitter from '~/public/twitter.svg';
 import { styled, theme } from '~/stitches.config';
 import useAuthenticated, { apiClient, logout, setGoogleAuth } from '~/utils/apiClient';
+import { HOST } from './_app';
 import { Place } from './api/places';
 
 const Home: NextPage = () => {
@@ -57,10 +58,31 @@ const Home: NextPage = () => {
 		},
 	});
 
+	const title = 'Pathtrami';
+	const description = `No more explaining how to get there! Share a location in 5 minutes with Pathtrami 🤌`;
+	const image = 'https://pathtrami.s3.amazonaws.com/preview_main.png';
+
 	return (
 		<Root>
 			<Head>
-				<title>My places - Pathtrami</title>
+				<title>Pathtrami</title>
+				<meta name='title' content={title} />
+				<meta
+					name='description'
+					content={description}
+				/>
+
+				<meta name='og:title' content={title} />
+				<meta name='og:description' content={description} />
+				<meta name='og:image' content={image} />
+				<meta name='og:url' content={HOST} />
+				<meta name='og:type' content='website' />
+
+				<meta name='twitter:title' content={title} />
+				<meta name='twitter:description' content={description} />
+				<meta name='twitter:image' content={image} />
+				<meta name='twitter:url' content={HOST} />
+				<meta name='twitter:card' content='summary_large_image' />
 			</Head>
 
 			<Header
