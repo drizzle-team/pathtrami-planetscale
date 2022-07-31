@@ -94,13 +94,19 @@ async function handlePost(
 	const { name, address, description, location, images } =
 		req.body as SavePlaceRequest;
 
-	const oldLocation = await db.places
+	const [oldLocation] = await db.places
 		.select({
 			lat: places.lat,
 			lng: places.lng,
 		})
 		.where(eq(places.slug, slug))
+		.limit(1)
 		.execute();
+
+	if (!oldLocation) {
+		res.status(404).json({ message: 'Place not found' });
+		return;
+	}
 
 	const fieldsToUpdate: MySqlUpdateSet<typeof places> = Object.fromEntries(
 		Object.entries({
@@ -113,6 +119,10 @@ async function handlePost(
 	);
 
 	let previewURL: string | null = null;
+
+	console.log('old location:', oldLocation);
+	console.log('new location:', location);
+	console.log('equal:', isEqual(oldLocation, location));
 
 	if (!isEqual(oldLocation, location)) {
 		const previewImage = await createUploadUrl(buildPlacePreviewKey(slug));

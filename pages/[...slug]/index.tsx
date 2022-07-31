@@ -31,7 +31,7 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 		router.back();
 	};
 
-	const mode = restPath[0] === 'edit' ? 'edit' : 'view';
+	const mode = (restPath[0] === 'edit' || restPath[0] === 'new') ? 'edit' : 'view';
 
 	useQuery(
 		['places', place.slug, 'editable'],
@@ -48,7 +48,6 @@ const LocationPage: NextPage<Props> = ({ place }) => {
 	);
 
 	const handlePlaceUpdated = () => {
-		router.replace(router.asPath);
 		setViewMode();
 	};
 
