@@ -1,4 +1,5 @@
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faGithub, faTwitter } from '@fortawesome/free-brands-svg-icons';
+import { faMapLocationDot, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Credentials } from 'google-auth-library';
@@ -9,8 +10,8 @@ import { useMutation, useQuery } from 'react-query';
 
 import Button from '~/components/Button';
 import Header from '~/components/Header';
-import LocationCard from '~/components/LocationCard';
-import { styled } from '~/stitches.config';
+import LocationCard, { LocationCardPlaceholder } from '~/components/LocationCard';
+import { styled, theme } from '~/stitches.config';
 import useAuthenticated, { apiClient, logout, setGoogleAuth } from '~/utils/apiClient';
 import { Place } from './api/places';
 
@@ -70,28 +71,68 @@ const Home: NextPage = () => {
 				}
 			/>
 
-			{placesQuery.data && (
-				<LocationCards>
-					{placesQuery.data.map((place) => (
-						<LocationCard
-							key={place.slug}
-							name={place.name}
-							address={place.address}
-							previewURL={place.previewURL}
-							location={place.location}
-							slug={place.slug}
-						/>
-					))}
-				</LocationCards>
-			)}
-
-			{isAuthenticated
+			{isAuthenticated && placesQuery.status !== 'success'
 				? (
-					<Button variant='secondary' style={{ marginTop: 50 }} onClick={handleLogout}>
-						Log out
-					</Button>
+					<LocationCards>
+						<LocationCardPlaceholder />
+					</LocationCards>
 				)
-				: <Button variant='primary' style={{ marginTop: 50 }} onClick={login}>Log in with Google</Button>}
+				: placesQuery.data?.length
+				? (
+					<LocationCards singlePlace={placesQuery.data.length === 1}>
+						{placesQuery.data.map((place) => (
+							<LocationCard
+								key={place.slug}
+								name={place.name}
+								address={place.address}
+								previewURL={place.previewURL}
+								slug={place.slug}
+								fullWidth={placesQuery.data.length === 1}
+							/>
+						))}
+					</LocationCards>
+				)
+				: (
+					<>
+						<div className='places-list-placeholder'>
+							<FontAwesomeIcon icon={faMapLocationDot} size='10x' color={theme.colors.bgDarkAlt.toString()} />
+							<div style={{ marginTop: '1rem', color: theme.colors.inputLabel.toString() }}>
+								Start by clicking the &quot;Add place&quot; button!
+							</div>
+						</div>
+					</>
+				)}
+
+			<div className='bottom'>
+				{isAuthenticated
+					? (
+						<Button variant='secondary' onClick={handleLogout}>
+							Log out
+						</Button>
+					)
+					: (
+						<>
+							<div style={{ alignSelf: 'center', marginBottom: 10 }}>Already have places?</div>
+							<Button variant='secondary' onClick={login}>Log in with Google</Button>
+						</>
+					)}
+			</div>
+
+			<div className='footer'>
+				<Button variant='primary' size='sm'>
+					<FontAwesomeIcon icon={faTwitter} size='2x' />
+				</Button>
+				<Link href='https://github.com/drizzle-team/pathtrami-planetscale'>
+					<a target='_blank'>
+						<Button variant='primary' size='sm'>
+							<FontAwesomeIcon icon={faGithub} size='2x' />
+						</Button>
+					</a>
+				</Link>
+				<Button variant='primary' size='sm' style={{ flex: 1 }}>
+					What is Pathtrami?
+				</Button>
+			</div>
 		</Root>
 	);
 };
@@ -102,6 +143,33 @@ const Root = styled('div', {
 	height: '100%',
 	display: 'flex',
 	flexFlow: 'column nowrap',
+
+	'.places-list-placeholder': {
+		alignSelf: 'center',
+		marginTop: 50,
+		display: 'flex',
+		flexFlow: 'column nowrap',
+		alignItems: 'center',
+	},
+
+	'.bottom': {
+		marginTop: 100,
+		display: 'flex',
+		flexFlow: 'column nowrap',
+	},
+
+	'.footer': {
+		marginTop: 20,
+		display: 'flex',
+		flexFlow: 'row nowrap',
+		alignItems: 'center',
+		gap: 10,
+
+		a: {
+			display: 'flex',
+			alignItems: 'center',
+		},
+	},
 });
 
 const LocationCards = styled('div', {
@@ -109,4 +177,12 @@ const LocationCards = styled('div', {
 	flexFlow: 'row nowrap',
 	gap: 15,
 	overflowY: 'auto',
+
+	variants: {
+		singlePlace: {
+			true: {
+				justifyContent: 'center',
+			},
+		},
+	},
 });

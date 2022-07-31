@@ -1,7 +1,9 @@
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import Link from 'next/link';
 import { FC } from 'react';
+import { RectShape, TextBlock } from 'react-placeholder/lib/placeholders';
+
+import 'react-placeholder/lib/reactPlaceholder.css';
 
 import { styled, theme } from '~/stitches.config';
 
@@ -11,21 +13,18 @@ interface Props {
 	name: string;
 	address: string;
 	previewURL: string;
-	location: {
-		lat: number;
-		lng: number;
-	};
 	slug: string;
+	fullWidth?: boolean;
 }
 
-const LocationCard: FC<Props> = ({ name, address, previewURL, location, slug }) => {
+const LocationCard: FC<Props> = ({ name, address, previewURL, slug, fullWidth = false }) => {
 	return (
-		<Link href={`/${slug}`}>
-			<a>
-				<Root>
+		<Root fullWidth={fullWidth}>
+			<Link href={`/${slug}`}>
+				<a>
 					<div className='preview'>
 						{/* eslint-disable-next-line @next/next/no-img-element */}
-						<img src={previewURL} alt={name} />
+						<img className='image' src={previewURL} alt={name} />
 					</div>
 					<TextWrapper>
 						<div>
@@ -33,13 +32,25 @@ const LocationCard: FC<Props> = ({ name, address, previewURL, location, slug }) 
 						</div>
 						<div>{address}</div>
 					</TextWrapper>
-				</Root>
-			</a>
-		</Link>
+				</a>
+			</Link>
+		</Root>
 	);
 };
 
 export default LocationCard;
+
+export const LocationCardPlaceholder: FC = () => (
+	<Root>
+		<div className='preview'>
+			{/* eslint-disable-next-line @next/next/no-img-element */}
+			<RectShape className='image' color={theme.colors.bgDarkAlt.toString()} />
+		</div>
+		<TextWrapper>
+			<TextBlock rows={2} color={theme.colors.bgDarkAlt.toString()} />
+		</TextWrapper>
+	</Root>
+);
 
 const Root = styled('div', {
 	borderRadius: 8,
@@ -47,13 +58,23 @@ const Root = styled('div', {
 	padding: '4px 4px 34px 4px',
 	userSelect: 'none',
 
+	variants: {
+		fullWidth: {
+			true: {
+				'a, .preview': {
+					width: '100%',
+				},
+			},
+		},
+	},
+
 	'.preview': {
 		width: theme.sizes.cardMapWidth,
 		height: theme.sizes.mapHeight,
 		borderRadius: `${theme.sizes.borderRadius}px ${theme.sizes.borderRadius}px 0 0`,
 		overflow: 'hidden',
 
-		img: {
+		'.image': {
 			width: '100%',
 			height: '100%',
 			objectFit: 'cover',

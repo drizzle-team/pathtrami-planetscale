@@ -5,6 +5,7 @@ specifiers:
   '@aws-sdk/s3-request-presigner': ^3.137.0
   '@babel/core': ^7.18.9
   '@fortawesome/fontawesome-svg-core': ^6.1.2
+  '@fortawesome/free-brands-svg-icons': ^6.1.2
   '@fortawesome/free-solid-svg-icons': ^6.1.2
   '@fortawesome/react-fontawesome': ^0.2.0
   '@react-oauth/google': ^0.2.6
@@ -42,6 +43,7 @@ specifiers:
   react-chatflow: ^1.0.17
   react-dom: 18.2.0
   react-leaflet: ^4.0.1
+  react-placeholder: ^4.1.0
   react-query: ^3.39.1
   react-toastify: ^9.0.7
   sharp: ^0.30.7
@@ -53,6 +55,7 @@ dependencies:
   '@aws-sdk/client-s3': 3.137.0
   '@aws-sdk/s3-request-presigner': 3.137.0
   '@fortawesome/fontawesome-svg-core': 6.1.2
+  '@fortawesome/free-brands-svg-icons': 6.1.2
   '@fortawesome/free-solid-svg-icons': 6.1.2
   '@fortawesome/react-fontawesome': 0.2.0_tebjjym7ugcdduvdrfbg7ugwxq
   '@react-oauth/google': 0.2.6_biqbaboplfbrettd7655fr4n2y
@@ -77,6 +80,7 @@ dependencies:
   react-chatflow: 1.0.17
   react-dom: 18.2.0_react@18.2.0
   react-leaflet: 4.0.1_zklzwh7pdkx5k4fi5tz77jtq6y
+  react-placeholder: 4.1.0_react@18.2.0
   react-query: 3.39.2_biqbaboplfbrettd7655fr4n2y
   react-toastify: 9.0.7_biqbaboplfbrettd7655fr4n2y
   sharp: 0.30.7
@@ -1244,6 +1248,14 @@ packages:
 
   /@fortawesome/fontawesome-svg-core/6.1.2:
     resolution: {integrity: sha512-853G/Htp0BOdXnPoeCPTjFrVwyrJHpe8MhjB/DYE9XjwhnNDfuBCd3aKc2YUYbEfHEcBws4UAA0kA9dymZKGjA==}
+    engines: {node: '>=6'}
+    requiresBuild: true
+    dependencies:
+      '@fortawesome/fontawesome-common-types': 6.1.2
+    dev: false
+
+  /@fortawesome/free-brands-svg-icons/6.1.2:
+    resolution: {integrity: sha512-b2eMfXQBsSxh52pcPtYchURQs6BWNh3zVTG8XH8Lv6V4kDhEg7D0kHN+K1SZniDiPb/e5tBlaygsinMUvetITA==}
     engines: {node: '>=6'}
     requiresBuild: true
     dependencies:
@@ -3697,6 +3709,14 @@ packages:
       leaflet: 1.8.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+    dev: false
+
+  /react-placeholder/4.1.0_react@18.2.0:
+    resolution: {integrity: sha512-z1HGD86NWJTYTQumHsmGH9jkozv4QHa9dju/vHVUd4f1svu23pf5v7QoBLBfs3kA1S9GLJaCeRMHLbO2SCdz5A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /react-query/3.39.2_biqbaboplfbrettd7655fr4n2y:
