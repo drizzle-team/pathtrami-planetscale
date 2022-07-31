@@ -63,9 +63,14 @@ const globalStyles = globalCss({
 		boxSizing: 'border-box',
 	},
 
+	html: {
+		height: '100%',
+		minHeight: '100%',
+	},
+
 	body: {
 		width: '100vw',
-		height: '100vh',
+		height: '100%',
 		backgroundColor: theme.colors.bg,
 		fontFamily: theme.fonts.system,
 		fontWeight: theme.fontWeights.text,

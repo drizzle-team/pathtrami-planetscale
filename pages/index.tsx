@@ -116,22 +116,22 @@ const Home: NextPage = () => {
 							<Button variant='secondary' onClick={login}>Log in with Google</Button>
 						</>
 					)}
-			</div>
 
-			<div className='footer'>
-				<Button variant='primary' size='sm'>
-					<FontAwesomeIcon icon={faTwitter} size='2x' />
-				</Button>
-				<Link href='https://github.com/drizzle-team/pathtrami-planetscale'>
-					<a target='_blank'>
-						<Button variant='primary' size='sm'>
-							<FontAwesomeIcon icon={faGithub} size='2x' />
-						</Button>
-					</a>
-				</Link>
-				<Button variant='primary' size='sm' style={{ flex: 1 }}>
-					What is Pathtrami?
-				</Button>
+				<div className='footer'>
+					<Button variant='primary' size='sm'>
+						<FontAwesomeIcon icon={faTwitter} size='2x' />
+					</Button>
+					<Link href='https://github.com/drizzle-team/pathtrami-planetscale'>
+						<a target='_blank'>
+							<Button variant='primary' size='sm'>
+								<FontAwesomeIcon icon={faGithub} size='2x' />
+							</Button>
+						</a>
+					</Link>
+					<Button variant='primary' size='sm' style={{ flex: 1 }}>
+						What is Pathtrami?
+					</Button>
+				</div>
 			</div>
 		</Root>
 	);
@@ -145,29 +145,32 @@ const Root = styled('div', {
 	flexFlow: 'column nowrap',
 
 	'.places-list-placeholder': {
+		flex: 1,
+		// marginBottom: 140,
 		alignSelf: 'center',
-		marginTop: 50,
 		display: 'flex',
 		flexFlow: 'column nowrap',
 		alignItems: 'center',
+		justifyContent: 'center',
 	},
 
 	'.bottom': {
-		marginTop: 100,
+		marginTop: 'auto',
+		paddingBottom: theme.sizes.screenPadding,
 		display: 'flex',
 		flexFlow: 'column nowrap',
-	},
 
-	'.footer': {
-		marginTop: 20,
-		display: 'flex',
-		flexFlow: 'row nowrap',
-		alignItems: 'center',
-		gap: 10,
-
-		a: {
+		'.footer': {
+			marginTop: 20,
 			display: 'flex',
+			flexFlow: 'row nowrap',
 			alignItems: 'center',
+			gap: 10,
+
+			a: {
+				display: 'flex',
+				alignItems: 'center',
+			},
 		},
 	},
 });
